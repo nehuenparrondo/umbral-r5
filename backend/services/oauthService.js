@@ -73,6 +73,17 @@ export const buildAuthorizationUrl = (provider, transaction) => {
   return url.toString();
 };
 
+const oauthRequestFailure = (message, url, status, reason) => {
+  const error = new AppError(message, 502);
+  const endpoint = new URL(url);
+  error.oauthDiagnostic = {
+    endpoint: endpoint.hostname + endpoint.pathname,
+    status,
+    reason,
+  };
+  return error;
+};
+
 const fetchJson = async (url, options = {}) => {
   let response;
   try {
@@ -81,7 +92,12 @@ const fetchJson = async (url, options = {}) => {
       signal: AbortSignal.timeout(PROFILE_TIMEOUT_MS),
     });
   } catch (_error) {
-    throw new AppError("El proveedor OAuth no respondio a tiempo.", 502);
+    throw oauthRequestFailure(
+      "El proveedor OAuth no respondio a tiempo.",
+      url,
+      null,
+      "network",
+    );
   }
 
   const text = await response.text();
@@ -89,13 +105,30 @@ const fetchJson = async (url, options = {}) => {
   try {
     payload = text ? JSON.parse(text) : {};
   } catch (_error) {
-    throw new AppError(
+    throw oauthRequestFailure(
       "El proveedor OAuth devolvio una respuesta invalida.",
-      502,
+      url,
+      response.status,
+      "invalid_json",
     );
   }
   if (!response.ok || payload.error) {
-    throw new AppError("El proveedor OAuth rechazo la solicitud.", 502);
+    const knownErrors = new Set([
+      "invalid_client",
+      "invalid_grant",
+      "invalid_request",
+      "access_denied",
+      "unauthorized_client",
+      "invalid_token",
+      "server_error",
+      "temporarily_unavailable",
+    ]);
+    throw oauthRequestFailure(
+      "El proveedor OAuth rechazo la solicitud.",
+      url,
+      response.status,
+      knownErrors.has(payload.error) ? payload.error : "provider_rejected",
+    );
   }
   return payload;
 };

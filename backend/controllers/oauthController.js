@@ -266,6 +266,12 @@ export const oauthCallback = async (req, res) => {
       clientUrl(`/perfil?oauth=${encodeURIComponent(provider.id)}`),
     );
   } catch (error) {
+    if (error.oauthDiagnostic) {
+      console.warn("OAuth provider request failed", {
+        provider: provider.id,
+        ...error.oauthDiagnostic,
+      });
+    }
     if (error.message === "OAUTH_EMAIL_MISSING") {
       return redirectError(res, "email_missing");
     }
