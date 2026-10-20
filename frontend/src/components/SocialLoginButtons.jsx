@@ -19,6 +19,13 @@ export function SocialLoginButtons() {
   const [providers, setProviders] = useState([]);
   const [status, setStatus] = useState("loading");
   const [attempt, setAttempt] = useState(0);
+  const [pendingProvider, setPendingProvider] = useState("");
+
+  useEffect(() => {
+    const resetNavigation = () => setPendingProvider("");
+    window.addEventListener("pageshow", resetNavigation);
+    return () => window.removeEventListener("pageshow", resetNavigation);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -43,7 +50,9 @@ export function SocialLoginButtons() {
   }, [attempt]);
 
   const begin = (providerId) => {
-    if (!isSocialProviderReady(providers, providerId, status)) return;
+    if (pendingProvider || !isSocialProviderReady(providers, providerId, status))
+      return;
+    setPendingProvider(providerId);
     // OAuth necesita una navegacion completa, no una llamada fetch/AJAX.
     window.location.assign(getOAuthStartUrl(providerId));
   };
@@ -55,7 +64,9 @@ export function SocialLoginButtons() {
       </div>
       <div className="social-login__grid">
         {defaults.map(({ id, label, Icon }) => {
-          const disabled = !isSocialProviderReady(providers, id, status);
+          const disabled =
+            Boolean(pendingProvider) ||
+            !isSocialProviderReady(providers, id, status);
           return (
             <button
               className={`social-button social-button--${id}`}
@@ -63,20 +74,29 @@ export function SocialLoginButtons() {
               key={id}
               onClick={() => begin(id)}
               disabled={disabled}
+              aria-busy={pendingProvider === id}
               title={
-                disabled
+                pendingProvider
+                  ? "Abriendo el acceso seguro del proveedor…"
+                  : disabled
                   ? `${label} no está disponible en este momento.`
                   : `Continuar con ${label}`
               }
             >
               <Icon aria-hidden="true" />
-              <span>Continuar con {label}</span>
+              <span>
+                {pendingProvider === id
+                  ? `Abriendo ${label}…`
+                  : `Continuar con ${label}`}
+              </span>
             </button>
           );
         })}
       </div>
       <p className="social-login__hint" role="status">
-        {status === "loading"
+        {pendingProvider
+          ? "Abriendo la página oficial del proveedor. Al terminar volverás a Umbral."
+          : status === "loading"
           ? "Comprobando opciones de acceso social…"
           : status === "error"
             ? "No pudimos comprobar el acceso social. Tu acceso con contraseña sigue disponible."
@@ -84,7 +104,7 @@ export function SocialLoginButtons() {
                   ({ id }) => !isSocialProviderReady(providers, id, status),
                 )
               ? "Algunas redes todavía no están configuradas. Podés ingresar con tu email y contraseña."
-              : "Acceso seguro con tu cuenta del proveedor."}
+              : "Elegí tu cuenta en Google o GitHub. En Discord, revisá la cuenta y usá «¿No eres tú?» para cambiarla. Vas a salir temporalmente de Umbral y volver al finalizar."}
       </p>
       {status === "error" ? (
         <button

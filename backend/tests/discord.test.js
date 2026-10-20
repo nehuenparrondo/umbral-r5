@@ -46,6 +46,7 @@ test("Discord solicita solo identidad/email, callback exacto y estado de un uso"
   assert.equal(url.pathname, "/oauth2/authorize");
   assert.equal(url.searchParams.get("response_type"), "code");
   assert.equal(url.searchParams.get("scope"), "identify email");
+  assert.equal(url.searchParams.get("prompt"), "consent");
   assert.equal(url.searchParams.get("state"), transaction.state);
   assert.equal(url.searchParams.get("redirect_uri"), discord.redirectUri);
   assert.equal(url.searchParams.has("client_secret"), false);

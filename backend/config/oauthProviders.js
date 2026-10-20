@@ -49,7 +49,12 @@ const auth0Provider = (id, label) => {
     clientSecret: env.auth0.clientSecret,
     redirectUri: finalRedirectUri,
     usePkce: true,
-    authorizationParams: { connection },
+    authorizationParams: {
+      connection,
+      ...(["google", "github"].includes(id)
+        ? { prompt: "login select_account" }
+        : {}),
+    },
     oidc: {
       issuer,
       jwksUrl: `${env.auth0.issuerBaseUrl}/.well-known/jwks.json`,
@@ -74,6 +79,7 @@ const directProviders = {
   google: provider("google", {
     label: "Google",
     authorizationUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+    authorizationParams: { prompt: "select_account" },
     tokenUrl: "https://oauth2.googleapis.com/token",
     userInfoUrl: "https://openidconnect.googleapis.com/v1/userinfo",
     scope: "openid email profile",
@@ -117,6 +123,7 @@ const directProviders = {
   github: provider("github", {
     label: "GitHub",
     authorizationUrl: "https://github.com/login/oauth/authorize",
+    authorizationParams: { prompt: "select_account" },
     tokenUrl: "https://github.com/login/oauth/access_token",
     userInfoUrl: "https://api.github.com/user",
     extraProfileUrls: { emails: "https://api.github.com/user/emails" },
@@ -147,6 +154,7 @@ const directProviders = {
   discord: provider("discord", {
     label: "Discord",
     authorizationUrl: "https://discord.com/oauth2/authorize",
+    authorizationParams: { prompt: "consent" },
     tokenUrl: "https://discord.com/api/v10/oauth2/token",
     userInfoUrl: "https://discord.com/api/v10/users/@me",
     scope: "identify email",

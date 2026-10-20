@@ -7,7 +7,7 @@
 - Se conservaron dos cuentas, sus UUID y hashes bcrypt, tres vínculos sociales y los eventos de auditoría. Se exige un nuevo login porque sesiones, estados OAuth y códigos anteriores no se trasladan.
 - La base anterior y el respaldo local siguen intactos, excluidos de Git. La API no los usa; `pg` ya no es una dependencia.
 - Google, GitHub y Discord completaron nuevamente el acceso real hasta el perfil usando MySQL. Siguen vinculados a la misma cuenta y sin duplicados.
-- 70 pruebas aprobadas: 10 de frontend y 60 de backend, incluidas concurrencia del estado OAuth, bloqueo de identidad, límite exacto de cinco códigos fallidos, distribución de producción, orígenes en Render y transporte OAuth con diagnóstico privado y pausa ante HTTP 429.
+- 71 pruebas aprobadas: 10 de frontend y 61 de backend, incluidas concurrencia del estado OAuth, bloqueo de identidad, límite exacto de cinco códigos fallidos, distribución de producción, orígenes en Render, selección de cuenta y transporte OAuth con diagnóstico privado y pausa ante HTTP 429.
 - La distribución de producción se probó localmente con MySQL: HTML/recursos de React, rutas profundas, cabeceras, health y JSON 404 de API. Los archivos privados y el código del backend no se sirven al navegador.
 - Diagnóstico SQL y autenticación SMTP/Mailtrap correctos. El correo de las pruebas se simula solo dentro del entorno de test.
 - **Web pública desplegada:** [https://umbral-r5.onrender.com](https://umbral-r5.onrender.com). Render confirmó `Deploy succeeded | Live`; `/api/health` responde 200 con MySQL conectado. Google, GitHub y Discord completaron el login real hasta el perfil del dominio público.
@@ -112,6 +112,16 @@ Se agregó el User-Agent de aplicación que exige la [referencia oficial de Disc
 Después de publicar esta corrección y esperar antes de la nueva prueba, Discord completó el acceso hasta `/perfil`, con el mensaje de éxito y las tres cuentas vinculadas visibles. Esto verifica el resultado; no demuestra por sí solo si el 429 anterior se debió al User-Agent, al límite de la IP compartida u otra condición del proveedor. Los límites externos siguen siendo responsabilidad del proveedor; no se usaron proxies ni se cambiaron IP para eludirlos. Referencia: [límites y Retry-After de Discord](https://docs.discord.com/developers/topics/rate-limits).
 
 El ciclo completo de correo desde Render todavía no está comprobado. La autenticación SMTP local y las pruebas automatizadas no equivalen a confirmar la entrega pública de códigos en Mailtrap.
+
+### Selección de cuenta, navegación y tiempos
+
+Cerrar sesión en Umbral revoca su sesión local, pero no cierra las sesiones de Google, GitHub o Discord en el navegador. No hay un email fijo en el código de acceso: la identidad proviene del perfil autenticado y verificado por el proveedor.
+
+Google/GitHub a través de Auth0 solicitan `prompt=login select_account` para no reutilizar silenciosamente la sesión del broker. Sus alternativas directas solicitan `select_account`. Discord solicita `prompt=consent`: muestra la cuenta actual y permite cambiarla mediante «¿No eres tú?», pero no ofrece el selector de cuentas de Google. Estos parámetros no agregan permisos ni eliminan state, nonce, PKCE, verificación de email o protección contra duplicados.
+
+El frontend informa la salida temporal al dominio oficial, muestra «Abriendo…», bloquea clics duplicados y restablece los botones al volver con el navegador. El cambio de dominio durante OAuth es esperado: al finalizar se regresa a `https://umbral-r5.onrender.com/perfil`. Nunca se piden claves de las redes dentro del formulario de Umbral.
+
+Render Free suspende el servidor después de 15 minutos sin tráfico y el arranque siguiente tarda aproximadamente un minuto, según su documentación oficial. Los parámetros de selección no eliminan ese arranque en frío ni la latencia del proveedor/MySQL. No se contrataron planes pagos ni se instalaron solicitudes periódicas para evitar la suspensión. Para una demostración, abrir la web antes y esperar a que cargue; no prometer tiempos instantáneos.
 
 La instalación limpia de la copia detectó el aviso [GHSA-698v-4r3x-3vcv](https://github.com/advisories/GHSA-698v-4r3x-3vcv), incorporado a la base de avisos el 20/10/2026. Se actualizó únicamente Vite a **6.4.4**, sin cambiar la lógica de la aplicación. La auditoría volvió a cero vulnerabilidades. La verificación final local aprobó lint, compilación y 70 pruebas; la copia limpia compila con las variables privadas configuradas exclusivamente en Render.
 
