@@ -7,10 +7,10 @@
 - Se conservaron dos cuentas, sus UUID y hashes bcrypt, tres vínculos sociales y los eventos de auditoría. Se exige un nuevo login porque sesiones, estados OAuth y códigos anteriores no se trasladan.
 - La base anterior y el respaldo local siguen intactos, excluidos de Git. La API no los usa; `pg` ya no es una dependencia.
 - Google, GitHub y Discord completaron nuevamente el acceso real hasta el perfil usando MySQL. Siguen vinculados a la misma cuenta y sin duplicados.
-- 64 pruebas aprobadas: 10 de frontend y 54 de backend, incluidas concurrencia del estado OAuth, bloqueo de identidad, límite exacto de cinco códigos fallidos, distribución de producción y selección segura de orígenes en Render.
+- 70 pruebas aprobadas: 10 de frontend y 60 de backend, incluidas concurrencia del estado OAuth, bloqueo de identidad, límite exacto de cinco códigos fallidos, distribución de producción, orígenes en Render y transporte OAuth con diagnóstico privado y pausa ante HTTP 429.
 - La distribución de producción se probó localmente con MySQL: HTML/recursos de React, rutas profundas, cabeceras, health y JSON 404 de API. Los archivos privados y el código del backend no se sirven al navegador.
 - Diagnóstico SQL y autenticación SMTP/Mailtrap correctos. El correo de las pruebas se simula solo dentro del entorno de test.
-- **Web pública desplegada:** [https://umbral-r5.onrender.com](https://umbral-r5.onrender.com). Render confirmó `Deploy succeeded | Live`; `/api/health` responde 200 con MySQL conectado. Los retornos de Google y GitHub en el panel Auth0 siguen pendientes de guardar y probar.
+- **Web pública desplegada:** [https://umbral-r5.onrender.com](https://umbral-r5.onrender.com). Render confirmó `Deploy succeeded | Live`; `/api/health` responde 200 con MySQL conectado. Google, GitHub y Discord completaron el login real hasta el perfil del dominio público.
 
 ### FreeDB: preparación comprobada el 19/10/2026
 
@@ -99,9 +99,21 @@ Las 19 variables de backend se importaron a Render con autorización explícita 
 
 Comprobaciones públicas: health y sesión anónima 200; lista de proveedores sin secretos; API inexistente 404 JSON; rutas profundas sirven React; los intentos de leer archivos privados solo reciben el HTML de la SPA, no esos archivos. Cabeceras HSTS/nosniff activas. Los tres inicios OAuth generan retornos HTTPS correctos y cookies Secure/HttpOnly. En móvil de 390 px no se observó desbordamiento horizontal. Esto no equivale a completar cada autorización real ni los correos desde Render.
 
-Discord ya conserva el retorno localhost y agrega `https://umbral-r5.onrender.com/api/auth/oauth/discord/callback`. Auth0 requiere entrar a la cuenta que contiene la aplicación existente para guardar los dos retornos públicos de Google/GitHub. No se creó otro tenant ni se copiaron cuentas locales para resolver ese acceso. Falta completar estos accesos reales y el ciclo de correo en el dominio público antes de presentar toda la autenticación como verificada.
+Discord conserva el retorno localhost y agrega `https://umbral-r5.onrender.com/api/auth/oauth/discord/callback`. En la aplicación Auth0 existente se guardaron y verificaron los retornos públicos de Google/GitHub, el origen HTTPS y la salida a `/login`, sin quitar los locales. Se recuperó la cuenta original de Auth0 con GitHub; no se creó otro tenant.
 
-La instalación limpia de la copia detectó el aviso [GHSA-698v-4r3x-3vcv](https://github.com/advisories/GHSA-698v-4r3x-3vcv), incorporado a la base de avisos el 20/10/2026. Se actualizó únicamente Vite a **6.4.4**, sin cambiar la lógica de la aplicación. La auditoría volvió a cero vulnerabilidades, con lint, compilación y 64 pruebas correctas.
+Los tres accesos reales se comprobaron el 20/10/2026, con autorización del titular para guardar su perfil/email en Aiven. Google creó una cuenta pública nueva; GitHub y Discord quedaron vinculados a ella. La comprobación SQL posterior confirmó **un usuario y tres vínculos**, sin duplicados ni copia de cuentas locales.
+
+### Discord: diagnóstico y verificación pública
+
+El primer acceso desde Render alcanzaba el consentimiento pero fallaba al intercambiar el código. El registro seguro identificó **HTTP 429** en el endpoint oficial de tokens de Discord; no se registraron claves, códigos, tokens ni cuerpos de respuestas. No se atribuyó este error a una contraseña del usuario ni se desactivaron verificaciones.
+
+Se agregó el User-Agent de aplicación que exige la [referencia oficial de Discord](https://docs.discord.com/developers/reference#user-agent) a las solicitudes de token y perfil. El transporte reconoce 429 incluso si devuelve HTML, conserva únicamente metadatos permitidos y respeta `Retry-After` o `retry_after` antes de emitir otra solicitud al mismo endpoint dentro del proceso. Sin plazo informado usa una pausa conservadora de 60 segundos; no reintenta automáticamente. El frontend muestra un aviso específico y permite elegir otro método.
+
+Después de publicar esta corrección y esperar antes de la nueva prueba, Discord completó el acceso hasta `/perfil`, con el mensaje de éxito y las tres cuentas vinculadas visibles. Esto verifica el resultado; no demuestra por sí solo si el 429 anterior se debió al User-Agent, al límite de la IP compartida u otra condición del proveedor. Los límites externos siguen siendo responsabilidad del proveedor; no se usaron proxies ni se cambiaron IP para eludirlos. Referencia: [límites y Retry-After de Discord](https://docs.discord.com/developers/topics/rate-limits).
+
+El ciclo completo de correo desde Render todavía no está comprobado. La autenticación SMTP local y las pruebas automatizadas no equivalen a confirmar la entrega pública de códigos en Mailtrap.
+
+La instalación limpia de la copia detectó el aviso [GHSA-698v-4r3x-3vcv](https://github.com/advisories/GHSA-698v-4r3x-3vcv), incorporado a la base de avisos el 20/10/2026. Se actualizó únicamente Vite a **6.4.4**, sin cambiar la lógica de la aplicación. La auditoría volvió a cero vulnerabilidades. La verificación final local aprobó lint, compilación y 70 pruebas; la copia limpia compila con las variables privadas configuradas exclusivamente en Render.
 
 En producción, si no se definen explícitamente `CLIENT_ORIGIN` y `SERVER_ORIGIN`, el backend adopta `RENDER_EXTERNAL_URL`, que asigna el alojamiento. Así no se adivina una URL pública ni se utiliza localhost por defecto en Render. Los valores explícitos siguen teniendo prioridad y el desarrollo local ignora esa variable de Render.
 
