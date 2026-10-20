@@ -150,6 +150,9 @@ const directProviders = {
     tokenUrl: "https://discord.com/api/v10/oauth2/token",
     userInfoUrl: "https://discord.com/api/v10/users/@me",
     scope: "identify email",
+    requestHeaders: {
+      "User-Agent": `DiscordBot (${env.serverOrigin}, 1.0.0)`,
+    },
     clientId: env.oauth.discord.clientId,
     clientSecret: env.oauth.discord.clientSecret,
     redirectUri: env.oauth.discord.redirectUri,

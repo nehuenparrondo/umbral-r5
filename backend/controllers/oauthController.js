@@ -62,6 +62,7 @@ const redirectError = (res, reason) => {
     "email_missing",
     "email_unverified",
     "account_disabled",
+    "rate_limited",
   ]);
   const code = allowed.has(reason) ? reason : "provider";
   return res.redirect(303, clientUrl(`/login?error=oauth_${code}`));
@@ -271,6 +272,8 @@ export const oauthCallback = async (req, res) => {
         provider: provider.id,
         ...error.oauthDiagnostic,
       });
+      if (error.oauthDiagnostic.reason === "rate_limited")
+        return redirectError(res, "rate_limited");
     }
     if (error.message === "OAUTH_EMAIL_MISSING") {
       return redirectError(res, "email_missing");

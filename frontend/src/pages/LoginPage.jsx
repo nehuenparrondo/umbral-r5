@@ -36,7 +36,7 @@ const oauthErrors = {
     "No se vinculo la cuenta porque el proveedor no confirmo ese email.",
   oauth_account_disabled: "La cuenta local esta desactivada.",
   oauth_rate_limited:
-    "Hubo demasiados intentos de acceso social. Espera unos minutos.",
+    "El proveedor limitó temporalmente las conexiones desde el servidor. Esperá antes de reintentar o ingresá con otro método.",
 };
 
 export function LoginPage() {

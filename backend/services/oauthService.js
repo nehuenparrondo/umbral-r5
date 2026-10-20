@@ -10,6 +10,7 @@ import { hashToken } from "./tokenService.js";
 
 const jwksCache = new Map();
 const PROFILE_TIMEOUT_MS = 10_000;
+const endpointCooldowns = new Map();
 
 const base64Url = (value) => Buffer.from(value).toString("base64url");
 
@@ -85,6 +86,22 @@ const oauthRequestFailure = (message, url, status, reason) => {
 };
 
 const fetchJson = async (url, options = {}) => {
+  const endpoint = new URL(url);
+  const endpointKey = endpoint.origin + endpoint.pathname;
+  const cooldownUntil = endpointCooldowns.get(endpointKey) || 0;
+  if (cooldownUntil > Date.now()) {
+    const error = oauthRequestFailure(
+      "El proveedor OAuth limito temporalmente las solicitudes.",
+      url,
+      429,
+      "rate_limited",
+    );
+    error.oauthDiagnostic.retryAfterSeconds = Math.ceil(
+      (cooldownUntil - Date.now()) / 1000,
+    );
+    throw error;
+  }
+  endpointCooldowns.delete(endpointKey);
   let response;
   try {
     response = await fetch(url, {
@@ -105,12 +122,40 @@ const fetchJson = async (url, options = {}) => {
   try {
     payload = text ? JSON.parse(text) : {};
   } catch (_error) {
-    throw oauthRequestFailure(
-      "El proveedor OAuth devolvio una respuesta invalida.",
-      url,
-      response.status,
-      "invalid_json",
+    if (response.status === 429) payload = {};
+    else {
+      throw oauthRequestFailure(
+        "El proveedor OAuth devolvio una respuesta invalida.",
+        url,
+        response.status,
+        "invalid_json",
+      );
+    }
+  }
+  if (response.status === 429) {
+    const header = response.headers.get("retry-after");
+    const headerSeconds = header
+      ? Number.isFinite(Number(header))
+        ? Number(header)
+        : (Date.parse(header) - Date.now()) / 1000
+      : NaN;
+    const bodySeconds =
+      typeof payload.retry_after === "number" ? payload.retry_after : NaN;
+    const delays = [headerSeconds, bodySeconds].filter(
+      (seconds) => Number.isFinite(seconds) && seconds > 0,
     );
+    const retryAfterSeconds = delays.length ? Math.ceil(Math.max(...delays)) : 60;
+    endpointCooldowns.set(endpointKey, Date.now() + retryAfterSeconds * 1000);
+    const error = oauthRequestFailure(
+      "El proveedor OAuth limito temporalmente las solicitudes.",
+      url,
+      429,
+      "rate_limited",
+    );
+    error.oauthDiagnostic.retryAfterSeconds = retryAfterSeconds;
+    if (Number.isSafeInteger(payload.code))
+      error.oauthDiagnostic.providerCode = payload.code;
+    throw error;
   }
   if (!response.ok || payload.error) {
     const knownErrors = new Set([
@@ -146,6 +191,7 @@ export const exchangeCodeForTokens = async (
   const headers = {
     Accept: "application/json",
     "Content-Type": "application/x-www-form-urlencoded",
+    ...provider.requestHeaders,
   };
 
   if (provider.tokenAuth === "basic") {
@@ -196,6 +242,7 @@ export const fetchNormalizedProfile = async (
   const headers = {
     Authorization: `Bearer ${tokens.access_token}`,
     Accept: "application/json",
+    ...provider.requestHeaders,
     ...provider.profileHeaders,
   };
   const raw = {
