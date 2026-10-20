@@ -10,7 +10,7 @@
 - 61 pruebas aprobadas: 10 de frontend y 51 de backend, incluidas concurrencia del estado OAuth, bloqueo de identidad, límite exacto de cinco códigos fallidos y distribución de producción.
 - La distribución de producción se probó localmente con MySQL: HTML/recursos de React, rutas profundas, cabeceras, health y JSON 404 de API. Los archivos privados y el código del backend no se sirven al navegador.
 - Diagnóstico SQL y autenticación SMTP/Mailtrap correctos. El correo de las pruebas se simula solo dentro del entorno de test.
-- **Todavía no hay una URL pública desplegada.** FreeDB y Render necesitan configurarse en las cuentas del titular y verificarse desde Internet.
+- **Todavía no hay una URL pública desplegada.** Aiven MySQL ya está conectado y Render está pendiente de configuración y permisos.
 
 ### FreeDB: preparación comprobada el 19/10/2026
 
@@ -75,7 +75,11 @@ Codificar caracteres especiales de usuario/clave con `encodeURIComponent` al con
 
 ## Aiven MySQL gratuito: alternativa elegida
 
-El titular eligió Aiven después del error de validación del certificado de FreeDB. El servicio de Aiven todavía no está creado: requiere ingresar a su cuenta y confirmar la creación del recurso gratuito. No se eliminó la base FreeDB ni se cambió la conexión local.
+El titular eligió y autorizó Aiven después del error de validación del certificado de FreeDB. El 20/10/2026 se creó `umbral-r5` con el plan **Free ($0)** en su propio proyecto, sin tarjeta ni plan pago. No se eliminó la base FreeDB ni se cambió la conexión local.
+
+Comprobación real: MySQL **8.4.11**, certificado CA obtenido del panel HTTPS oficial, validación de cadena y nombre del servidor activadas, y cifrado **TLS_AES_256_GCM_SHA384**. Se verificó una base vacía antes de crear ocho tablas InnoDB. Después de importar hay dos roles, cero usuarios, cero vínculos sociales y cero eventos de auditoría; no se copiaron cuentas ni hashes locales. La comprobación de salud usa el mismo módulo SQL de la aplicación.
+
+La conexión de preparación y el CA quedan únicamente en `backend/.env.hosting`, ignorado por Git. La aplicación local conserva `backend/.env`. La credencial inicial de Aiven se utilizó para preparar el esquema; antes de ejecutar una API pública debe revisarse o sustituirse por una cuenta SQL limitada. No se afirma que el acceso público o los proveedores OAuth remotos hayan sido probados todavía.
 
 1. Ingresar personalmente en `https://console.aiven.io/`. Si no hay cuenta, completar el registro y aceptar personalmente los términos. No introducir tarjetas ni activar pruebas o planes pagos.
 2. Seleccionar **MySQL**, un servicio nuevo para R5 y el plan **Free ($0)**. Comprobar el importe antes de crear. No usar PostgreSQL, MariaDB ni un servicio ajeno.
@@ -91,7 +95,7 @@ Según [Aiven Free MySQL](https://aiven.io/docs/products/mysql/concepts/mysql-fr
 
 `render.yaml` define un único servicio Node **Free** que construye React y sirve frontend/API desde el mismo dominio HTTPS. No define ninguna base PostgreSQL.
 
-1. Autorizar la publicación del código en un repositorio propio, preferentemente privado, sin `.env`, `.local`, binarios, datos ni claves. No se creó ni publicó un repositorio automáticamente.
+1. El titular autorizó y se publicó una copia limpia en el repositorio privado `nehuenparrondo/umbral-r5`. Se incluyeron 144 archivos revisados, sin credenciales, datos, dependencias instaladas ni historial anterior. La copia de publicación está separada de la carpeta original; esta conserva sus cambios y su Git intactos. No cambiar la visibilidad del repositorio para resolver permisos de Render.
 2. Ingresar a Render y crear el servicio con el repositorio y `render.yaml`, revisando permisos, términos y plan antes de confirmar.
 3. Compilación: `npm ci --include=dev && npm run build`. Inicio: `npm start`. Salud: `/api/health`. El puerto lo proporciona Render mediante `PORT`.
 4. Configurar `DATABASE_URL` de MySQL, `DATABASE_SSL=true`, `NODE_ENV=production`, `COOKIE_SECURE=true` y un `JWT_SECRET` propio de despliegue.
