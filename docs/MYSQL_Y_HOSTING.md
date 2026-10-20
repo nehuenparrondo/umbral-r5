@@ -10,7 +10,7 @@
 - 64 pruebas aprobadas: 10 de frontend y 54 de backend, incluidas concurrencia del estado OAuth, bloqueo de identidad, límite exacto de cinco códigos fallidos, distribución de producción y selección segura de orígenes en Render.
 - La distribución de producción se probó localmente con MySQL: HTML/recursos de React, rutas profundas, cabeceras, health y JSON 404 de API. Los archivos privados y el código del backend no se sirven al navegador.
 - Diagnóstico SQL y autenticación SMTP/Mailtrap correctos. El correo de las pruebas se simula solo dentro del entorno de test.
-- **Todavía no hay una URL pública desplegada.** Aiven MySQL ya está conectado y Render está pendiente de configuración y permisos.
+- **Web pública desplegada:** [https://umbral-r5.onrender.com](https://umbral-r5.onrender.com). Render confirmó `Deploy succeeded | Live`; `/api/health` responde 200 con MySQL conectado. Los retornos de Google y GitHub en el panel Auth0 siguen pendientes de guardar y probar.
 
 ### FreeDB: preparación comprobada el 19/10/2026
 
@@ -79,7 +79,7 @@ El titular eligió y autorizó Aiven después del error de validación del certi
 
 Comprobación real: MySQL **8.4.11**, certificado CA obtenido del panel HTTPS oficial, validación de cadena y nombre del servidor activadas, y cifrado **TLS_AES_256_GCM_SHA384**. Se verificó una base vacía antes de crear ocho tablas InnoDB. Después de importar hay dos roles, cero usuarios, cero vínculos sociales y cero eventos de auditoría; no se copiaron cuentas ni hashes locales. La comprobación de salud usa el mismo módulo SQL de la aplicación.
 
-La conexión de preparación y el CA quedan únicamente en `backend/.env.hosting`, ignorado por Git. La aplicación local conserva `backend/.env`. La credencial inicial de Aiven se utilizó para preparar el esquema; antes de ejecutar una API pública debe revisarse o sustituirse por una cuenta SQL limitada. No se afirma que el acceso público o los proveedores OAuth remotos hayan sido probados todavía.
+La conexión y el CA quedan únicamente en `backend/.env.hosting`, ignorado por Git. La aplicación local conserva `backend/.env`. El titular autorizó crear `umbral_r5_web`: exige SSL, tiene permisos por tabla y no administra el motor ni puede modificar/borrar auditoría. Se verificaron las ocho tablas y el rechazo real de un UPDATE de auditoría. La credencial inicial solo se conserva como `DATABASE_MIGRATION_URL` para preparación privada; **no se cargó en Render**.
 
 1. Ingresar personalmente en `https://console.aiven.io/`. Si no hay cuenta, completar el registro y aceptar personalmente los términos. No introducir tarjetas ni activar pruebas o planes pagos.
 2. Seleccionar **MySQL**, un servicio nuevo para R5 y el plan **Free ($0)**. Comprobar el importe antes de crear. No usar PostgreSQL, MariaDB ni un servicio ajeno.
@@ -93,7 +93,13 @@ Según [Aiven Free MySQL](https://aiven.io/docs/products/mysql/concepts/mysql-fr
 
 ## Alojamiento web con Render
 
-Preparación del 20/10/2026: se conectó GitHub después de la autorización del titular y su confirmación personal por email. Render puede acceder únicamente al repositorio privado `nehuenparrondo/umbral-r5`. El formulario de servicio está preparado con el plan **Free ($0)**, compilación reproducible y arranque Node; todavía no se cargaron secretos ni se confirmó el despliegue público.
+Publicación del 20/10/2026: se conectó GitHub después de la autorización del titular y su confirmación personal por email. Render puede acceder únicamente al repositorio privado `nehuenparrondo/umbral-r5`. Se creó el servicio `srv-dbbtt1d9fdbs73a8q4k0` con el plan **Free ($0)**, compilación reproducible, Node 24, cookies seguras y health check `/api/health`. No se cargaron tarjetas ni se contrataron planes pagos.
+
+Las 19 variables de backend se importaron a Render con autorización explícita y se compararon en memoria, incluido el PEM completo del CA. Se generó un JWT exclusivo del servicio. La cuenta SQL es limitada; ninguna credencial de administración, archivo de datos o cuenta local se transfirió a la web. Las claves de Auth0, Discord y SMTP permanecen en las variables privadas del servicio, nunca en GitHub o variables VITE.
+
+Comprobaciones públicas: health y sesión anónima 200; lista de proveedores sin secretos; API inexistente 404 JSON; rutas profundas sirven React; los intentos de leer archivos privados solo reciben el HTML de la SPA, no esos archivos. Cabeceras HSTS/nosniff activas. Los tres inicios OAuth generan retornos HTTPS correctos y cookies Secure/HttpOnly. En móvil de 390 px no se observó desbordamiento horizontal. Esto no equivale a completar cada autorización real ni los correos desde Render.
+
+Discord ya conserva el retorno localhost y agrega `https://umbral-r5.onrender.com/api/auth/oauth/discord/callback`. Auth0 requiere entrar a la cuenta que contiene la aplicación existente para guardar los dos retornos públicos de Google/GitHub. No se creó otro tenant ni se copiaron cuentas locales para resolver ese acceso. Falta completar estos accesos reales y el ciclo de correo en el dominio público antes de presentar toda la autenticación como verificada.
 
 La instalación limpia de la copia detectó el aviso [GHSA-698v-4r3x-3vcv](https://github.com/advisories/GHSA-698v-4r3x-3vcv), incorporado a la base de avisos el 20/10/2026. Se actualizó únicamente Vite a **6.4.4**, sin cambiar la lógica de la aplicación. La auditoría volvió a cero vulnerabilidades, con lint, compilación y 64 pruebas correctas.
 
