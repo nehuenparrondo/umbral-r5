@@ -1,0 +1,35 @@
+{
+  "name": "r5-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "predev": "npm run db:start --workspace @r5/backend",
+    "dev": "concurrently --kill-others --names FRONT,BACK --prefix-colors cyan,magenta \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "npm run dev --workspace @r5/frontend",
+    "dev:server": "npm run dev --workspace @r5/backend",
+    "start": "npm start --workspace @r5/backend",
+    "build": "npm run build --workspace @r5/frontend",
+    "preview": "npm run preview --workspace @r5/frontend",
+    "lint": "npm run lint --workspaces",
+    "format": "prettier --write --ignore-unknown frontend/src backend docs README.md package.json",
+    "test": "npm run test --workspaces --if-present",
+    "check:backend": "npm run check --workspace @r5/backend",
+    "db:create-admin": "npm run db:create-admin --workspace @r5/backend",
+    "db:migrate": "npm run db:migrate --workspace @r5/backend",
+    "db:start": "npm run db:start --workspace @r5/backend",
+    "setup:local": "npm run setup:local --workspace @r5/backend",
+    "db:stop": "npm run db:stop --workspace @r5/backend",
+    "doctor": "npm run doctor --workspace @r5/backend",
+    "mail:check": "npm run mail:check --workspace @r5/backend",
+    "oauth:check": "npm run oauth:check --workspace @r5/backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.4.2"
+  }
+}

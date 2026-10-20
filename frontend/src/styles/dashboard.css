@@ -1,0 +1,245 @@
+/* Paneles privados: grillas fluidas y tablas desplazables sin desbordar la página. */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.profile-heading {
+  grid-column: 1 / -1;
+  margin: 0 0 12px;
+}
+.profile-heading,
+.admin-layout > .section-heading {
+  padding: 8px 0 12px;
+}
+.profile-section {
+  display: grid;
+  min-width: 0;
+  gap: 22px;
+  padding: 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 19px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title > svg {
+  width: 43px;
+  height: 43px;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--accent);
+  background: var(--surface-muted);
+  stroke-width: 1.5;
+}
+.panel-title h2 {
+  font-size: 17px;
+  margin-bottom: 5px;
+}
+.panel-title p,
+.current-email {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.oauth-accounts-panel {
+  grid-column: 1 / -1;
+}
+.oauth-account-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 14px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.oauth-account-list li {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+.oauth-account-list strong {
+  text-transform: capitalize;
+  font-weight: 600;
+}
+.oauth-account-list span {
+  color: var(--text-muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.muted-copy {
+  font-size: 13px;
+  margin-bottom: 0;
+}
+.admin-layout {
+  min-width: 0;
+  display: grid;
+  gap: 24px;
+}
+.admin-layout > * {
+  min-width: 0;
+}
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-tabs button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 14px 20px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.admin-tabs button[aria-selected="true"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.admin-tabs svg {
+  width: 16px;
+  height: 16px;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.toolbar .field {
+  min-width: min(100%, 240px);
+  font-size: 12px;
+}
+.toolbar__count {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.toolbar__count svg {
+  width: 16px;
+  height: 16px;
+}
+.table-wrap {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.user-table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.user-table th,
+.user-table td {
+  padding: 18px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+.user-table th {
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+}
+.user-table tr:last-child td {
+  border-bottom: 0;
+}
+.user-table tbody tr:hover {
+  background: var(--surface-muted);
+}
+.user-table td strong,
+.user-table td > span {
+  display: block;
+}
+.user-table td strong {
+  margin-bottom: 3px;
+  font-weight: 600;
+}
+.user-table td span {
+  color: var(--text-muted);
+}
+.user-table td .event-failure {
+  color: var(--danger);
+}
+.user-table select {
+  min-height: 38px;
+  max-width: 100px;
+  padding: 6px 10px;
+  font-size: 11px;
+  border-radius: 8px;
+}
+.user-table .button {
+  padding: 8px 12px;
+  min-height: 38px;
+}
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.switch input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent);
+}
+.empty-cell {
+  padding: 36px !important;
+  color: var(--text-muted);
+  text-align: center !important;
+}
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.pagination .button {
+  padding: 10px 16px;
+}
+@media (max-width: 760px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .profile-section {
+    padding: 22px;
+  }
+  .pagination {
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .pagination .button {
+    padding: 10px;
+  }
+  .toolbar {
+    align-items: stretch;
+  }
+}

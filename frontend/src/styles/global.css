@@ -1,0 +1,11 @@
+/**
+ * Índice de estilos. Cada archivo tiene una responsabilidad y comparte tokens:
+ * tema → base → marco → acceso → controles → pantallas privadas.
+ * Ningún estilo modifica la autenticación ni el contrato de la API.
+ */
+@import "./tokens.css";
+@import "./base.css";
+@import "./shell.css";
+@import "./auth.css";
+@import "./forms.css";
+@import "./dashboard.css";

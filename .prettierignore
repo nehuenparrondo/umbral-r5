@@ -1,0 +1,9 @@
+# Datos, secretos y resultados generados no son fuentes para formatear.
+node_modules/
+**/node_modules/
+.local/
+**/dist/
+test-results/
+**/.env
+**/.env.*
+package-lock.json

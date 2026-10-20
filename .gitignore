@@ -1,0 +1,30 @@
+# Dependencies installed locally by npm.
+node_modules/
+
+# Motores SQL locales, datos y credenciales: nunca se entregan ni se suben.
+.local/
+test-results/
+
+# Front-end production build output.
+dist/
+
+# Local environment secrets; keep real credentials out of Git.
+.env
+.env.*
+!.env.example
+
+# Logs and runtime noise.
+*.log
+npm-debug.log*
+
+# Operating system metadata.
+.DS_Store
+Thumbs.db
+
+# Editor-specific folders.
+.vscode/
+.idea/
+
+# This file exports: ignore rules for Git.
+# It is used by: Git in the proyectouno repository.
+# It imports from: no project files.

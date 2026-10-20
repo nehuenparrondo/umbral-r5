@@ -1,0 +1,60 @@
+/* Paleta semántica. El modo oscuro es la base; el claro conserva jerarquía y contraste. */
+:root {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --bg-strong: #0e1528;
+  --surface: #131c30;
+  --surface-raised: #1a2540;
+  --surface-muted: #10182a;
+  --text: #f1f4fc;
+  --text-muted: #a4b0c9;
+  --border: #2a3650;
+  --accent: #b3beff;
+  --accent-strong: #cad2ff;
+  --accent-soft: #263052;
+  --on-accent: #151c37;
+  --mint: #98e4cd;
+  --blue: #b6cbff;
+  --blue-soft: #1c2e50;
+  --danger: #ffb0b5;
+  --danger-soft: #3c2334;
+  --success: #a2e1c5;
+  --success-soft: #183b36;
+  --warning: #f1d197;
+  --warning-soft: #453621;
+  --radius: 12px;
+  --radius-lg: 24px;
+  --shadow: 0 20px 70px #03071224;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f4f9;
+  --bg-strong: #e9edf7;
+  --surface: #ffffff;
+  --surface-raised: #eef0fa;
+  --surface-muted: #f7f8fc;
+  --text: #18223a;
+  --text-muted: #58657e;
+  --border: #d7deec;
+  --accent: #4b50b8;
+  --accent-strong: #383c96;
+  --accent-soft: #e9eafd;
+  --on-accent: #ffffff;
+  --mint: #286f60;
+  --blue: #345ea1;
+  --blue-soft: #e8effd;
+  --danger: #a62940;
+  --danger-soft: #fff0f2;
+  --success: #21654f;
+  --success-soft: #e7f5ee;
+  --warning: #855c19;
+  --warning-soft: #fff5e1;
+  --shadow: 0 20px 70px #27345b0d;
+}
