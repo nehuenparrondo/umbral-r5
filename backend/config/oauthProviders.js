@@ -52,7 +52,7 @@ const auth0Provider = (id, label) => {
     authorizationParams: {
       connection,
       ...(["google", "github"].includes(id)
-        ? { prompt: "login select_account" }
+        ? { prompt: id === "github" ? "select_account" : "login select_account" }
         : {}),
     },
     oidc: {

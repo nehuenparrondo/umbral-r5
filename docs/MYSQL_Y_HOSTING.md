@@ -117,7 +117,7 @@ El ciclo completo de correo desde Render todavía no está comprobado. La autent
 
 Cerrar sesión en Umbral revoca su sesión local, pero no cierra las sesiones de Google, GitHub o Discord en el navegador. No hay un email fijo en el código de acceso: la identidad proviene del perfil autenticado y verificado por el proveedor.
 
-Google/GitHub a través de Auth0 solicitan `prompt=login select_account` para no reutilizar silenciosamente la sesión del broker. Sus alternativas directas solicitan `select_account`. Discord solicita `prompt=consent`: muestra la cuenta actual y permite cambiarla mediante «¿No eres tú?», pero no ofrece el selector de cuentas de Google. Estos parámetros no agregan permisos ni eliminan state, nonce, PKCE, verificación de email o protección contra duplicados.
+Google a través de Auth0 solicita `prompt=login select_account`; GitHub solicita únicamente `prompt=select_account`, el valor que reconoce su selector. La prueba con ambos valores combinados permitía a GitHub omitir la selección, por lo que se ajustaron por proveedor. Sus alternativas directas solicitan `select_account`. Discord solicita `prompt=consent`: muestra la cuenta actual y permite cambiarla mediante «¿No eres tú?», pero no ofrece el selector de cuentas de Google. Estos parámetros no agregan permisos ni eliminan state, nonce, PKCE, verificación de email o protección contra duplicados.
 
 El frontend informa la salida temporal al dominio oficial, muestra «Abriendo…», bloquea clics duplicados y restablece los botones al volver con el navegador. El cambio de dominio durante OAuth es esperado: al finalizar se regresa a `https://umbral-r5.onrender.com/perfil`. Nunca se piden claves de las redes dentro del formulario de Umbral.
 

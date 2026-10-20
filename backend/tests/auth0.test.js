@@ -79,7 +79,7 @@ test("Cada boton fuerza su conexion Auth0 con Authorization Code, PKCE y nonce",
   assert.equal(url.pathname, "/authorize");
   assert.equal(url.searchParams.get("response_type"), "code");
   assert.equal(url.searchParams.get("connection"), "github");
-  assert.equal(url.searchParams.get("prompt"), "login select_account");
+  assert.equal(url.searchParams.get("prompt"), "select_account");
   assert.equal(url.searchParams.get("code_challenge_method"), "S256");
   assert.equal(url.searchParams.get("nonce"), transaction.nonce);
 
@@ -103,7 +103,10 @@ test("Google y GitHub no reutilizan silenciosamente la sesión del broker", () =
     const url = new URL(
       buildAuthorizationUrl(provider, createOAuthTransaction(provider)),
     );
-    assert.equal(url.searchParams.get("prompt"), "login select_account");
+    assert.equal(
+      url.searchParams.get("prompt"),
+      providerId === "github" ? "select_account" : "login select_account",
+    );
     assert.equal(url.searchParams.has("login_hint"), false);
     assert.equal(url.searchParams.has("id_token_hint"), false);
   }
