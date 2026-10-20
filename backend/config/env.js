@@ -51,6 +51,10 @@ const auth0EnabledProviders = new Set(
 );
 
 const nodeEnv = process.env.NODE_ENV || "development";
+const renderOrigin =
+  nodeEnv === "production"
+    ? optional("RENDER_EXTERNAL_URL").replace(/\/+$/, "")
+    : "";
 // JWT_SECRET nunca se hardcodea: sale de .env.
 const jwtSecret = required("JWT_SECRET");
 
@@ -64,8 +68,8 @@ export const env = {
   nodeEnv,
   isProduction: nodeEnv === "production",
   port: toInteger(process.env.PORT, 4000),
-  serverOrigin: optional("SERVER_ORIGIN") || "http://localhost:4000",
-  clientOrigins: (process.env.CLIENT_ORIGIN || "http://localhost:5173")
+  serverOrigin: optional("SERVER_ORIGIN") || renderOrigin || "http://localhost:4000",
+  clientOrigins: (process.env.CLIENT_ORIGIN || renderOrigin || "http://localhost:5173")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean),
