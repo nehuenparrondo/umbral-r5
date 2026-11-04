@@ -1,6 +1,10 @@
 /**
  * Inserta logs de auditoria sin datos sensibles. Resuelve trazabilidad de login,
  * perfil y admin.
+ *
+ * Lectura guiada. Registro y consulta de eventos relevantes. La auditoría permite explicar
+ * quién realizó una acción sin guardar contraseñas ni convertirla en una lista editable
+ * desde el perfil.
  */
 import { query } from "../config/db.js";
 
@@ -41,6 +45,6 @@ export async function listAuditLogs({ page, pageSize, action }) {
   return { events: rows, total: count.rows[0].total, page, pageSize };
 }
 
-// This file exports: writeAuditLog.
-// It is used by: auth, profile, and admin controllers.
-// It imports from: backend/config/db.js.
+// Exporta: writeAuditLog.
+// Lo utilizan: auth, profile, and admin controllers.
+// Depende de: backend/config/db.js.

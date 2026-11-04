@@ -1,5 +1,9 @@
 /**
  * Define endpoints protegidos de administracion con verificacion de rol admin.
+ *
+ * Lectura guiada. Tabla de endpoints: conecta método/ruta con validaciones, permisos y
+ * controlador. La ruta recibe solicitudes HTTP; los modelos y servicios contienen el
+ * trabajo sobre datos.
  */
 import { Router } from "express";
 import {
@@ -52,6 +56,6 @@ router.patch(
 
 export default router;
 
-// This file exports: adminRoutes router.
-// It is used by: backend/app.js under /api/admin.
-// It imports from: admin controllers, auth/validation middlewares, validators, and errors.
+// Exporta: adminRoutes router.
+// Lo utilizan: backend/app.js under /api/admin.
+// Depende de: admin controllers, auth/validation middlewares, validators, and errors.

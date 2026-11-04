@@ -1,4 +1,10 @@
 /**
+ * Guía de lectura. Ayudas compartidas para transformar o validar datos. Usarlas desde
+ * varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito
+ * en la interfaz.
+ */
+
+/**
  * Traduce errores externos a motivos internos seguros. No refleja descripciones
  * del proveedor ni confunde cualquier denegación con una cancelación del usuario.
  */

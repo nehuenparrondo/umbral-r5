@@ -1,3 +1,9 @@
+/**
+ * Guía de lectura. Pantalla AdminPage. Coordina presentación y eventos; seguir los
+ * servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los
+ * datos.
+ */
+
 // Requisito 4.4: separa gestion de usuarios e historial en componentes propios.
 import { useState } from "react";
 import { Users, History } from "lucide-react";

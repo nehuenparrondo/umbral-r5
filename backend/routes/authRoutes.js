@@ -1,6 +1,10 @@
 /**
  * Define endpoints de autenticacion y conecta validaciones/rate
  * limiters/controladores.
+ *
+ * Lectura guiada. Tabla de endpoints: conecta método/ruta con validaciones, permisos y
+ * controlador. La ruta recibe solicitudes HTTP; los modelos y servicios contienen el
+ * trabajo sobre datos.
  */
 import { Router } from "express";
 import {
@@ -113,6 +117,6 @@ router.post(
 
 export default router;
 
-// This file exports: authRoutes router.
-// It is used by: backend/app.js under /api/auth.
-// It imports from: auth controllers, auth middlewares, rate limiters, validators, and errors.
+// Exporta: authRoutes router.
+// Lo utilizan: backend/app.js under /api/auth.
+// Depende de: auth controllers, auth middlewares, rate limiters, validators, and errors.

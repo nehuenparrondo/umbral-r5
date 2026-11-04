@@ -1,5 +1,9 @@
 /**
  * Reutiliza una vista para verificar email, desbloquear y recuperar contrasena.
+ *
+ * Lectura guiada. Pantalla compartida de códigos. El propósito distingue verificar,
+ * desbloquear o restablecer; un mismo número no autoriza operaciones distintas sin el
+ * desafío correspondiente.
  */
 import { ArrowRight, Mail, RotateCw } from "lucide-react";
 import { useState } from "react";
@@ -196,6 +200,6 @@ export function CodePage({ purpose }) {
   );
 }
 
-// This file exports: CodePage.
-// It is used by: App with a fixed purpose per route.
-// It imports from: code services, auth/form hooks and reusable UI components.
+// Exporta: CodePage.
+// Lo utilizan: App with a fixed purpose per route.
+// Depende de: code services, auth/form hooks and reusable UI components.

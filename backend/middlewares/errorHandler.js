@@ -1,5 +1,8 @@
 /**
  * Centraliza errores sin exponer stack traces. Resuelve manejo seguro de errores.
+ *
+ * Lectura guiada. Última traducción de errores a respuestas HTTP legibles. Evita devolver
+ * detalles internos innecesarios y centraliza cómo una excepción llega al formulario.
  */
 import { env } from "../config/env.js";
 import { AppError } from "../utils/errors.js";
@@ -72,6 +75,6 @@ export const errorHandler = (error, _req, res, _next) => {
   });
 };
 
-// This file exports: notFoundHandler and errorHandler.
-// It is used by: backend/app.js as centralized error handling.
-// It imports from: backend/config/env.js and backend/utils/errors.js.
+// Exporta: notFoundHandler and errorHandler.
+// Lo utilizan: backend/app.js as centralized error handling.
+// Depende de: backend/config/env.js and backend/utils/errors.js.

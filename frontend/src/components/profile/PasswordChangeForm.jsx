@@ -1,5 +1,9 @@
 /**
  * Cambia una clave existente o crea una para cuentas nacidas por OAuth.
+ *
+ * Lectura guiada. Componente reutilizable PasswordChangeForm. Sus props conectan contenido
+ * y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
+ * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { KeyRound } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth.js";
@@ -87,6 +91,6 @@ export function PasswordChangeForm() {
   );
 }
 
-// This file exports: PasswordChangeForm.
-// It is used by: ProfilePage.
-// It imports from: session, useForm, password validators and controls.
+// Exporta: PasswordChangeForm.
+// Lo utilizan: ProfilePage.
+// Depende de: session, useForm, password validators and controls.

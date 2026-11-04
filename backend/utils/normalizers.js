@@ -1,6 +1,10 @@
 /**
  * Normaliza email, username, identificador y displayName. Resuelve trim/lowercase
  * anti-duplicados.
+ *
+ * Lectura guiada. Ayudas compartidas para transformar o validar datos. Usarlas desde
+ * varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito
+ * en la interfaz.
  */
 export const normalizeEmail = (email) =>
   String(email || "")
@@ -22,6 +26,6 @@ export const cleanDisplayName = (displayName) =>
     .trim()
     .replace(/\s+/g, " ");
 
-// This file exports: input normalization helpers.
-// It is used by: controllers, validations, scripts, and models.
-// It imports from: no project files.
+// Exporta: input normalization helpers.
+// Lo utilizan: controllers, validations, scripts, and models.
+// Depende de: no project files.

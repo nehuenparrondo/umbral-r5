@@ -1,6 +1,9 @@
 /**
  * Define rutas publicas, privadas y admin. Resuelve navegacion y proteccion de
  * vistas.
+ *
+ * Lectura guiada. Mapa de páginas de Umbral. Reúne rutas públicas y protegidas, sin
+ * implementar consultas SQL ni autenticación de proveedores dentro del componente.
  */
 import { Navigate, Route, Routes } from "react-router-dom";
 import { lazy, Suspense } from "react";
@@ -72,6 +75,6 @@ export default function App() {
   );
 }
 
-// This file exports: App (root route component).
-// It is used by: src/main.jsx.
-// It imports from: components, pages, and react-router-dom.
+// Exporta: App (root route component).
+// Lo utilizan: src/main.jsx.
+// Depende de: components, pages, and react-router-dom.

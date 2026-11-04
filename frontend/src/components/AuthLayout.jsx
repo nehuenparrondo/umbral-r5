@@ -2,6 +2,10 @@
  * Marco visual de los recorridos públicos. Solo compone presentación:
  * los formularios conservan sus validaciones, estado y llamadas a la API.
  * La ilustración es decorativa y está excluida del árbol de accesibilidad.
+ *
+ * Lectura guiada. Componente reutilizable AuthLayout. Sus props conectan contenido y
+ * acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
+ * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import {
   ArrowUpRight,

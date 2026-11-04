@@ -1,6 +1,10 @@
 /**
  * Monta React con Router, AuthProvider y ThemeProvider. Resuelve entrada de frontend
  * y contextos globales.
+ *
+ * Lectura guiada. Punto de entrada del navegador: monta React sobre el elemento raíz del
+ * HTML e instala los proveedores/navegación declarados. No es un servidor Node.js ni una
+ * conexión a la base.
  */
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -22,6 +26,6 @@ createRoot(document.getElementById("root")).render(
   </StrictMode>,
 );
 
-// This file exports: no named exports; it mounts the React app.
-// It is used by: index.html through Vite.
-// It imports from: React, React Router, App, context providers, and global CSS.
+// Exporta: no named exports; it mounts the React app.
+// Lo utilizan: index.html through Vite.
+// Depende de: React, React Router, App, context providers, and global CSS.

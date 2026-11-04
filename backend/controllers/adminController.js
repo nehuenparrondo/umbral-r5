@@ -1,6 +1,9 @@
 /**
  * Implementa gestion admin de usuarios. Resuelve rol admin, listado sin hashes y
  * auditoria de acciones.
+ *
+ * Lectura guiada. Listado/edición administrativa y consulta de auditoría. Los permisos se
+ * exigen en las rutas; los cambios de rol y estado no son simples preferencias visuales.
  */
 import { writeAuditLog } from "../models/auditLogModel.js";
 import { listUsers, updateUserAdminFields } from "../models/userModel.js";
@@ -90,6 +93,6 @@ export const getAuditLogs = async (req, res) => {
   res.json(result);
 };
 
-// This file exports: admin controller handlers.
-// It is used by: backend/routes/adminRoutes.js.
-// It imports from: audit/user models and AppError.
+// Exporta: admin controller handlers.
+// Lo utilizan: backend/routes/adminRoutes.js.
+// Depende de: audit/user models and AppError.

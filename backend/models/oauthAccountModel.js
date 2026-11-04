@@ -1,5 +1,9 @@
 /**
  * Consulta y crea vinculos normalizados entre usuarios locales y proveedores OAuth.
+ *
+ * Lectura guiada. Vínculos entre usuario local e identidad externa: proveedor +
+ * identificador del proveedor. No almacena la contraseña de Google/GitHub/Discord ni sus
+ * mensajes.
  */
 import { query } from "../config/db.js";
 
@@ -44,6 +48,6 @@ export const listOAuthAccountsByUserId = async (userId, client = { query }) => {
   return rows;
 };
 
-// This file exports: OAuth account persistence functions.
-// It is used by: OAuth and user controllers.
-// It imports from: backend/config/db.js.
+// Exporta: OAuth account persistence functions.
+// Lo utilizan: OAuth and user controllers.
+// Depende de: backend/config/db.js.

@@ -1,5 +1,9 @@
 /**
  * Servicios de autenticacion usados por formularios y contexto.
+ *
+ * Lectura guiada. Funciones pequeñas para registro, acceso, sesión y proveedores.
+ * Mantienen las direcciones HTTP fuera de los formularios y delegan el transporte a
+ * apiClient.
  */
 import {
   apiRequest,
@@ -70,6 +74,6 @@ export const getOAuthProviders = (signal) =>
 export const getOAuthStartUrl = (provider) =>
   `${API_BASE_URL}/api/auth/oauth/${encodeURIComponent(provider)}`;
 
-// This file exports: auth service functions.
-// It is used by: AuthContext, LoginPage, and RegisterPage.
-// It imports from: src/services/apiClient.js.
+// Exporta: auth service functions.
+// Lo utilizan: AuthContext, LoginPage, and RegisterPage.
+// Depende de: src/services/apiClient.js.

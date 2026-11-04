@@ -1,5 +1,9 @@
 /**
  * Edita datos no sensibles; el email se verifica por un recorrido separado.
+ *
+ * Lectura guiada. Componente reutilizable ProfileDetailsForm. Sus props conectan contenido
+ * y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
+ * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { Save, UserRound } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth.js";
@@ -61,6 +65,6 @@ export function ProfileDetailsForm() {
   );
 }
 
-// This file exports: ProfileDetailsForm.
-// It is used by: ProfilePage.
-// It imports from: session, useForm, validators and shared controls.
+// Exporta: ProfileDetailsForm.
+// Lo utilizan: ProfilePage.
+// Depende de: session, useForm, validators and shared controls.

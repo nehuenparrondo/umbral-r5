@@ -1,5 +1,9 @@
 /**
  * Mantiene el envio SMTP de R3 mediante Mailtrap sin exponer credenciales.
+ *
+ * Lectura guiada. Transporte de códigos mediante SMTP. Lee configuración privada del
+ * servidor; tener un mensaje construido no demuestra que el proveedor haya aceptado
+ * enviarlo.
  */
 import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
@@ -70,6 +74,6 @@ export async function sendCode({ to, code, purpose }) {
 // Usado por npm run mail:check para probar conexion y autenticacion sin enviar correo.
 export const verifyMailConnection = () => getTransport().verify();
 
-// This file exports: Mailtrap helpers and a test-only outbox.
-// It is used by: challengeService and checkMail.
-// It imports from: nodemailer, env and AppError.
+// Exporta: Mailtrap helpers and a test-only outbox.
+// Lo utilizan: challengeService and checkMail.
+// Depende de: nodemailer, env and AppError.

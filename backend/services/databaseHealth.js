@@ -1,3 +1,9 @@
+/**
+ * Guía de lectura. Servicio reutilizable de la aplicación. Separa operaciones de datos o
+ * comunicación de la presentación; sus funciones importadas indican si la operación es
+ * local, HTTP o de servidor.
+ */
+
 // Requisito 10: comprobar el servicio SQL real, no solo que Express responda.
 import { query } from "../config/db.js";
 

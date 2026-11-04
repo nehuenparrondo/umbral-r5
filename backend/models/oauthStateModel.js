@@ -1,6 +1,9 @@
 /**
  * Persiste y consume una sola vez los estados OAuth y verificadores PKCE de corta
  * duracion.
+ *
+ * Lectura guiada. Transacciones temporales de redirección OAuth. El estado se consume una
+ * sola vez para relacionar el retorno con el navegador que comenzó el acceso.
  */
 import { query, withTransaction } from "../config/db.js";
 
@@ -37,6 +40,6 @@ export const consumeOAuthState = async ({ stateHash, provider }, client) => {
   return client ? consume(client) : withTransaction(consume);
 };
 
-// This file exports: createOAuthState and consumeOAuthState.
-// It is used by: backend/controllers/oauthController.js.
-// It imports from: backend/config/db.js.
+// Exporta: createOAuthState and consumeOAuthState.
+// Lo utilizan: backend/controllers/oauthController.js.
+// Depende de: backend/config/db.js.

@@ -1,6 +1,10 @@
 /**
  * Cliente HTTP con cookies, CSRF, parseo de errores y refresh automatico. Resuelve
  * comunicacion segura front-back.
+ *
+ * Lectura guiada. Puente HTTP común: envía cookies, agrega CSRF y transforma respuestas en
+ * errores legibles. Si vence el acceso intenta una renovación compartida y reintenta una
+ * sola vez.
  */
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
@@ -49,6 +53,10 @@ const parseResponse = async (response) => {
   }
 };
 
+/**
+ * Comparte una promesa de renovación entre solicitudes concurrentes. Actualiza CSRF con la
+ * respuesta y libera la promesa al terminar, también si falla.
+ */
 export const refreshSession = async () => {
   // Serializa la rotacion del refresh token para evitar carreras.
   if (!refreshPromise) {
@@ -79,6 +87,10 @@ export const refreshSession = async () => {
   return refreshPromise;
 };
 
+/**
+ * Serializa el cuerpo, envía cookies y CSRF y convierte errores HTTP en ApiError. Ante 401
+ * puede renovar y reintentar una vez; no confundir una respuesta fallida con éxito visual.
+ */
 export const apiRequest = async (path, options = {}) => {
   // GET por defecto para lecturas.
   const method = options.method || "GET";
@@ -136,6 +148,6 @@ export const apiRequest = async (path, options = {}) => {
   return payload;
 };
 
-// This file exports: ApiError, csrf helpers, and apiRequest.
-// It is used by: auth, user, and admin services.
-// It imports from: Vite environment variables and browser fetch.
+// Exporta: ApiError, csrf helpers, and apiRequest.
+// Lo utilizan: auth, user, and admin services.
+// Depende de: Vite environment variables and browser fetch.

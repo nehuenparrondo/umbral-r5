@@ -1,5 +1,9 @@
 /**
  * Servicios del panel admin.
+ *
+ * Lectura guiada. Servicio reutilizable de la aplicación. Separa operaciones de datos o
+ * comunicación de la presentación; sus funciones importadas indican si la operación es
+ * local, HTTP o de servidor.
  */
 import { apiRequest } from "./apiClient.js";
 
@@ -18,6 +22,6 @@ export const updateUserAdmin = ({ id, role, isActive }) =>
     body: { role, isActive },
   });
 
-// This file exports: admin API service functions.
-// It is used by: src/pages/AdminPage.jsx.
-// It imports from: src/services/apiClient.js.
+// Exporta: admin API service functions.
+// Lo utilizan: src/pages/AdminPage.jsx.
+// Depende de: src/services/apiClient.js.

@@ -1,5 +1,9 @@
 /**
  * Mensajes accesibles de exito/error/info.
+ *
+ * Lectura guiada. Componente reutilizable Alert. Sus props conectan contenido y acciones
+ * con el componente que lo usa; para seguir el dato, buscar sus importaciones y los
+ * callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 
@@ -26,6 +30,6 @@ export function Alert({ type = "info", title, children }) {
   );
 }
 
-// This file exports: Alert (feedback component).
-// It is used by: LoginPage, RegisterPage, ProfilePage, and AdminPage.
-// It imports from: lucide-react.
+// Exporta: Alert (feedback component).
+// Lo utilizan: LoginPage, RegisterPage, ProfilePage, and AdminPage.
+// Depende de: lucide-react.

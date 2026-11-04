@@ -1,6 +1,10 @@
 /**
  * Declara los proveedores sociales y permite centralizarlos en Auth0 sin duplicar el
  * flujo OAuth.
+ *
+ * Lectura guiada. Describe los proveedores y devuelve al frontend solo su disponibilidad
+ * pública. Google/GitHub se configuran mediante Auth0 y Discord por su integración; los
+ * secretos permanecen del lado del servidor.
  */
 import { env } from "./env.js";
 
@@ -258,6 +262,6 @@ export const listPublicOAuthProviders = () =>
     }),
   );
 
-// This file exports: oauthProviders, getOAuthProvider and listPublicOAuthProviders.
-// It is used by: OAuth service and controller.
-// It imports from: backend/config/env.js.
+// Exporta: oauthProviders, getOAuthProvider and listPublicOAuthProviders.
+// Lo utilizan: OAuth service and controller.
+// Depende de: backend/config/env.js.

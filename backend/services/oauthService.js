@@ -1,6 +1,10 @@
 /**
  * Ejecuta Authorization Code, PKCE, validacion OIDC y normaliza perfiles externos sin
  * guardar tokens.
+ *
+ * Lectura guiada. Protocolo del acceso social: state, PKCE, intercambio de código,
+ * verificación OIDC y normalización del perfil. Los tokens externos se usan para consultar
+ * identidad, no se guardan como contraseña local.
  */
 import crypto from "node:crypto";
 import { createRemoteJWKSet, jwtVerify } from "jose";
@@ -24,6 +28,10 @@ export const createPkcePair = () => {
   return { codeVerifier, codeChallenge };
 };
 
+/**
+ * Genera state y, según proveedor, nonce y PKCE con vencimiento. Son datos de una
+ * redirección puntual, no un permiso permanente para entrar a cualquier cuenta.
+ */
 export const createOAuthTransaction = (provider) => {
   const state = base64Url(crypto.randomBytes(32));
   const nonce = provider.oidc ? base64Url(crypto.randomBytes(32)) : null;
@@ -51,6 +59,10 @@ export const oauthStateCookieOptions = (provider, secure) => ({
   maxAge: 10 * 60 * 1000,
 });
 
+/**
+ * Construye la dirección externa con callback, scopes y parámetros del proveedor. El
+ * cambio de dominio durante el acceso es la redirección normal de OAuth.
+ */
 export const buildAuthorizationUrl = (provider, transaction) => {
   const url = new URL(provider.authorizationUrl);
   url.searchParams.set("response_type", "code");
@@ -178,6 +190,11 @@ const fetchJson = async (url, options = {}) => {
   return payload;
 };
 
+/**
+ * Intercambia el código del callback usando credenciales privadas del backend y el
+ * verificador PKCE cuando corresponde. Nunca debe ejecutarse con el client secret dentro
+ * del navegador.
+ */
 export const exchangeCodeForTokens = async (
   provider,
   { code, codeVerifier },
@@ -231,6 +248,10 @@ const verifyOidcToken = async (provider, idToken, nonce) => {
   return payload;
 };
 
+/**
+ * Consulta la identidad externa y la convierte al formato común. Si hay OIDC, compara la
+ * identidad firmada con UserInfo antes de entregar el perfil al controlador.
+ */
 export const fetchNormalizedProfile = async (
   provider,
   tokens,
@@ -302,6 +323,10 @@ export const safeUsernameBase = ({ username, name, provider }) => {
   return cleaned.length >= 3 ? cleaned : `usuario_${provider}`.slice(0, 30);
 };
 
+/**
+ * Decisión pura: usar un vínculo existente, rechazar email ausente/no verificado o
+ * permitir vincular/registrar. No escribe SQL; el controlador aplica la decisión.
+ */
 export const decideOAuthAccountAction = ({
   existingAccount,
   email,
@@ -315,6 +340,6 @@ export const decideOAuthAccountAction = ({
   return existingUser ? "link" : "register";
 };
 
-// This file exports: OAuth transaction, URL, token, profile and normalization helpers.
-// It is used by: backend/controllers/oauthController.js and tests.
-// It imports from: node:crypto, jose, token service, normalizers and errors.
+// Exporta: OAuth transaction, URL, token, profile and normalization helpers.
+// Lo utilizan: backend/controllers/oauthController.js and tests.
+// Depende de: node:crypto, jose, token service, normalizers and errors.

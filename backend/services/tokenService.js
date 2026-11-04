@@ -1,6 +1,10 @@
 /**
  * Genera y verifica JWT, CSRF y refresh tokens. Resuelve autenticacion segura y
  * rotacion.
+ *
+ * Lectura guiada. Crea los distintos tipos de credencial: JWT corto para acceso, refresh
+ * aleatorio para renovar y CSRF para autorizar peticiones que cambian datos. No son
+ * intercambiables.
  */
 import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
@@ -8,6 +12,10 @@ import { env } from "../config/env.js";
 
 export const createCsrfToken = () => crypto.randomBytes(32).toString("hex");
 
+/**
+ * Devuelve dos representaciones del mismo secreto: rawToken para la cookie y tokenHash
+ * para SQL. No registrar rawToken en logs ni enviarlo en datos públicos del perfil.
+ */
 export const createRefreshToken = () => {
   // Token crudo aleatorio: se envia al navegador como cookie httpOnly.
   const rawToken = crypto.randomBytes(64).toString("hex");
@@ -26,6 +34,10 @@ export const refreshExpiryDate = () => {
   return expiresAt;
 };
 
+/**
+ * Firma un JWT con ID, rol, sesión y CSRF; incluye vencimiento, emisor y audiencia. Firmar
+ * permite detectar modificaciones, no cifra los datos del token.
+ */
 export const signAccessToken = ({ user, sessionId, csrfToken }) =>
   // JWT corto: identifica usuario, rol, sesion y CSRF.
   jwt.sign(
@@ -44,6 +56,10 @@ export const signAccessToken = ({ user, sessionId, csrfToken }) =>
     },
   );
 
+/**
+ * Comprueba firma, vencimiento, emisor y audiencia del JWT. La vigencia de la sesión en
+ * SQL se comprueba además en el middleware.
+ */
 export const verifyAccessToken = (token) =>
   // Verifica firma, issuer y audience para rechazar tokens de otro origen.
   jwt.verify(token, env.jwtSecret, {
@@ -51,6 +67,6 @@ export const verifyAccessToken = (token) =>
     audience: env.jwtAudience,
   });
 
-// This file exports: JWT, refresh-token, and CSRF token helpers.
-// It is used by: auth middleware and auth controller.
-// It imports from: node:crypto, jsonwebtoken, backend/config/env.js.
+// Exporta: JWT, refresh-token, and CSRF token helpers.
+// Lo utilizan: auth middleware and auth controller.
+// Depende de: node:crypto, jsonwebtoken, backend/config/env.js.

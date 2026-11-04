@@ -1,5 +1,9 @@
 /**
  * Verifica email, desbloquea cuentas y recupera contrasenas con Mailtrap.
+ *
+ * Lectura guiada. Recibe códigos de email y coordina verificación, desbloqueo o contraseña
+ * nueva. Usa los desafíos del servidor; no acepta que el navegador declare por sí mismo un
+ * email verificado.
  */
 import bcrypt from "bcrypt";
 import { randomUUID } from "node:crypto";
@@ -24,6 +28,10 @@ import {
 import { ensureMailConfigured } from "../services/mailService.js";
 import { AppError } from "../utils/errors.js";
 
+/**
+ * Recibe identificador y propósito y responde con formato uniforme incluso si la cuenta no
+ * existe. Solicita un correo únicamente cuando esa cuenta reúne las condiciones.
+ */
 export async function requestCode(req, res) {
   ensureMailConfigured();
   const user = await findUserByIdentifierForAuth(req.body.identifier);
@@ -57,6 +65,10 @@ export async function requestCode(req, res) {
   });
 }
 
+/**
+ * Consume el desafío según su propósito. Verificar email regresa al login; desbloquear
+ * puede abrir una nueva sesión. No tratar ambos resultados como si fueran iguales.
+ */
 export async function confirmCode(req, res) {
   const { challengeId, code, purpose } = req.body;
   const result = await consumeChallenge(
@@ -104,6 +116,10 @@ export async function confirmCode(req, res) {
   return res.json({ user: result.user, csrfToken: result.tokens.csrfToken });
 }
 
+/**
+ * Consume un desafío reset_password, guarda bcrypt de la nueva contraseña y revoca
+ * sesiones y desafíos anteriores. Al terminar exige iniciar sesión otra vez.
+ */
 export async function resetPassword(req, res) {
   const passwordHash = await bcrypt.hash(
     req.body.newPassword,
@@ -130,6 +146,6 @@ export async function resetPassword(req, res) {
   res.json({ message: "Contrasena actualizada. Inicia sesion nuevamente." });
 }
 
-// This file exports: requestCode, confirmCode and resetPassword.
-// It is used by: authRoutes.
-// It imports from: challenges, auth sessions, MySQL models and bcrypt.
+// Exporta: requestCode, confirmCode and resetPassword.
+// Lo utilizan: authRoutes.
+// Depende de: challenges, auth sessions, MySQL models and bcrypt.

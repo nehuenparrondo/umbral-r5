@@ -1,6 +1,9 @@
 /**
  * Componente guardia de rutas autenticadas/admin. Resuelve proteccion visual
  * complementaria al backend.
+ *
+ * Lectura guiada. Guarda visual de navegación mientras se comprueba sesión/rol. No protege
+ * la base por sí sola: el backend vuelve a exigir autorización.
  */
 import { Navigate } from "react-router-dom";
 import { LoaderCircle } from "lucide-react";
@@ -29,6 +32,6 @@ export function ProtectedRoute({ children, requireAdmin = false }) {
   return children;
 }
 
-// This file exports: ProtectedRoute (auth/admin route guard).
-// It is used by: src/App.jsx.
-// It imports from: react-router-dom, lucide-react, and src/hooks/useAuth.js.
+// Exporta: ProtectedRoute (auth/admin route guard).
+// Lo utilizan: src/App.jsx.
+// Depende de: react-router-dom, lucide-react, and src/hooks/useAuth.js.

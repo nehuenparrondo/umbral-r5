@@ -1,6 +1,10 @@
 /**
  * Lee y valida variables de entorno. Resuelve no hardcodear secretos, puertos, CORS,
  * JWT y bcrypt configurables.
+ *
+ * Lectura guiada. Lee y valida la configuración privada del backend. Un nombre de variable
+ * no es su valor secreto; las claves se cargan desde entorno/.env y nunca deben copiarse a
+ * la interfaz.
  */
 import dotenv from "dotenv";
 import { fileURLToPath } from "node:url";
@@ -145,6 +149,6 @@ export const env = {
   },
 };
 
-// This file exports: env (validated runtime configuration).
-// It is used by: backend config, services, controllers, and server startup.
-// It imports from: dotenv and process.env.
+// Exporta: env (validated runtime configuration).
+// Lo utilizan: backend config, services, controllers, and server startup.
+// Depende de: dotenv and process.env.

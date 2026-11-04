@@ -1,6 +1,10 @@
 /**
  * Implementa perfil propio y cambio de contrasena. Resuelve privacidad por usuario,
  * validacion de contrasena actual y revocacion de sesiones.
+ *
+ * Lectura guiada. Operaciones de perfil y contraseña de la cuenta autenticada. La
+ * identidad viene del middleware de sesión; no se permite escoger otro usuario cambiando
+ * un campo del formulario.
  */
 import bcrypt from "bcrypt";
 import { env } from "../config/env.js";
@@ -128,6 +132,6 @@ export const changePassword = async (req, res) => {
   });
 };
 
-// This file exports: profile controller handlers.
-// It is used by: backend/routes/userRoutes.js.
-// It imports from: bcrypt, env, audit/session/user models, errors, and normalizers.
+// Exporta: profile controller handlers.
+// Lo utilizan: backend/routes/userRoutes.js.
+// Depende de: bcrypt, env, audit/session/user models, errors, and normalizers.

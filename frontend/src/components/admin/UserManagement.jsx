@@ -1,5 +1,9 @@
 /**
  * Panel admin para listar usuarios y cambiar rol/estado sin exponer hashes.
+ *
+ * Lectura guiada. Componente reutilizable UserManagement. Sus props conectan contenido y
+ * acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
+ * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { RefreshCw, Save, Users } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";

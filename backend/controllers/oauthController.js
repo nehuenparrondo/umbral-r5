@@ -1,6 +1,10 @@
 /**
  * Inicia y completa login social generico, vincula/crea usuarios y emite la sesion
  * local existente.
+ *
+ * Lectura guiada. Recorrido del login social: iniciar la redirección, validar el retorno y
+ * resolver la cuenta local dentro de una transacción. Emite las mismas cookies de Umbral
+ * que el login tradicional.
  */
 import crypto from "node:crypto";
 import { env } from "../config/env.js";
@@ -72,6 +76,10 @@ export const listProviders = (_req, res) => {
   res.json({ providers: listPublicOAuthProviders() });
 };
 
+/**
+ * Crea una transacción temporal en SQL, instala una cookie state y redirige a la red. No
+ * inicia sesión local hasta completar y validar el retorno.
+ */
 export const startOAuth = async (req, res) => {
   const provider = getOAuthProvider(req.params.provider);
   if (!provider?.isConfigured) return redirectError(res, "not_configured");
@@ -96,6 +104,10 @@ export const startOAuth = async (req, res) => {
   }
 };
 
+/**
+ * Busca primero proveedor + ID externo. Para vincular por email exige verificación; si
+ * registra una cuenta social, su passwordHash es null, no la contraseña de la red.
+ */
 const resolveOAuthUser = async ({ provider, profile, client }) => {
   const existingAccount = await findOAuthAccount(
     { provider: provider.id, providerUserId: profile.providerUserId },
@@ -186,6 +198,10 @@ const resolveOAuthUser = async ({ provider, profile, client }) => {
   return { user, action };
 };
 
+/**
+ * Compara cookie/state, consume la transacción, obtiene el perfil y crea o vincula la
+ * cuenta con bloqueos SQL. Solo después emite cookies locales y redirige al perfil.
+ */
 export const oauthCallback = async (req, res) => {
   const provider = getOAuthProvider(req.params.provider);
   if (!provider?.isConfigured) return redirectError(res, "not_configured");
@@ -289,6 +305,6 @@ export const oauthCallback = async (req, res) => {
   }
 };
 
-// This file exports: provider listing, OAuth start and callback handlers.
-// It is used by: backend/routes/oauthRoutes.js.
-// It imports from: OAuth config/service/models, auth session helpers and database transaction.
+// Exporta: provider listing, OAuth start and callback handlers.
+// Lo utilizan: backend/routes/oauthRoutes.js.
+// Depende de: OAuth config/service/models, auth session helpers and database transaction.

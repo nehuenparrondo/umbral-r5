@@ -1,5 +1,9 @@
 /**
  * Comparte estado, validacion y errores entre formularios R3/R5.
+ *
+ * Lectura guiada. Agrupa valores, validación, estado pendiente y errores por campo.
+ * Recibir una respuesta correcta del servidor es lo que permite mostrar éxito, no
+ * simplemente pulsar Enviar.
  */
 import { useState } from "react";
 import { fieldErrorsToObject } from "../utils/validators.js";
@@ -70,6 +74,6 @@ export function useForm(initialValues, validate, onSubmit) {
   };
 }
 
-// This file exports: useForm.
-// It is used by: CodePage and profile forms.
-// It imports from: React and validators.
+// Exporta: useForm.
+// Lo utilizan: CodePage and profile forms.
+// Depende de: React and validators.

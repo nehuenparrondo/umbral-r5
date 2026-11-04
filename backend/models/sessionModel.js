@@ -1,6 +1,9 @@
 /**
  * Contiene consultas parametrizadas de sesiones. Resuelve refresh tokens hasheados,
  * rotacion y revocacion.
+ *
+ * Lectura guiada. Persistencia y revocación de sesiones. Guarda el hash del refresh token
+ * y permite rotarlo sin aceptar dos usos simultáneos del mismo valor anterior.
  */
 import { randomUUID } from "node:crypto";
 import { query } from "../config/db.js";
@@ -109,6 +112,6 @@ export const revokeAllUserSessions = async (userId, client = { query }) => {
   );
 };
 
-// This file exports: session persistence functions.
-// It is used by: auth middleware and auth/user controllers.
-// It imports from: backend/config/db.js and node:crypto.
+// Exporta: session persistence functions.
+// Lo utilizan: auth middleware and auth/user controllers.
+// Depende de: backend/config/db.js and node:crypto.

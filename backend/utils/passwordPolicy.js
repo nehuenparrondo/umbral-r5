@@ -1,6 +1,10 @@
 /**
  * Define politica de contrasenas. Resuelve longitud, mayuscula, minuscula, numero y
  * simbolo.
+ *
+ * Lectura guiada. Ayudas compartidas para transformar o validar datos. Usarlas desde
+ * varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito
+ * en la interfaz.
  */
 export const passwordPolicy = {
   minLength: 10,
@@ -21,6 +25,6 @@ export const validatePasswordStrength = (password) =>
   Buffer.byteLength(password, "utf8") <= 72 &&
   passwordPolicy.pattern.test(password);
 
-// This file exports: password policy constants and validators.
-// It is used by: backend validations and admin seed scripts.
-// It imports from: no project files.
+// Exporta: password policy constants and validators.
+// Lo utilizan: backend validations and admin seed scripts.
+// Depende de: no project files.

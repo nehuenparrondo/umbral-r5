@@ -1,6 +1,10 @@
 /**
  * Centraliza nombres y opciones de cookies httpOnly. Resuelve JWT seguro, SameSite,
  * Secure y expiracion.
+ *
+ * Lectura guiada. Política común de cookies de acceso y renovación. La configuración debe
+ * coincidir al crearlas y borrarlas; las cookies de sesión no son datos de perfil
+ * editables.
  */
 import { env } from "./env.js";
 
@@ -34,6 +38,6 @@ export const expiredAccessCookieOptions = {
   maxAge: 0,
 };
 
-// This file exports: cookie names and secure cookie options.
-// It is used by: auth controllers and token/session flows.
-// It imports from: backend/config/env.js.
+// Exporta: cookie names and secure cookie options.
+// Lo utilizan: auth controllers and token/session flows.
+// Depende de: backend/config/env.js.

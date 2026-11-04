@@ -1,4 +1,9 @@
-/** Pool MySQL con consultas preparadas y transacciones reales. */
+/** Pool MySQL con consultas preparadas y transacciones reales.
+ *
+ * Lectura guiada. Pool MySQL y adaptador del resultado de las consultas. Usa parámetros y
+ * transacciones; la base puede estar en Aiven con TLS o en la configuración local, sin
+ * cambiar los modelos.
+ */
 import { createHash } from "node:crypto";
 import mysql from "mysql2/promise";
 import { env } from "./env.js";
@@ -71,6 +76,10 @@ export const pool = {
 };
 export const query = (sql, params) => pool.query(sql, params);
 
+/**
+ * Entrega una conexión a una operación y coordina commit/rollback y liberación. Todas sus
+ * consultas deben usar ese client para pertenecer a la misma transacción.
+ */
 export async function withTransaction(callback) {
   const connection = await driverPool.getConnection();
   const client = wrapMySQLConnection(connection);

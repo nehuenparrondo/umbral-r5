@@ -1,5 +1,9 @@
 /**
  * Formulario de registro con validacion en tiempo real y chequeo de disponibilidad.
+ *
+ * Lectura guiada. Pantalla RegisterPage. Coordina presentación y eventos; seguir los
+ * servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los
+ * datos.
  */
 import { UserPlus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -290,6 +294,6 @@ export function RegisterPage() {
   );
 }
 
-// This file exports: RegisterPage (registration view).
-// It is used by: src/App.jsx.
-// It imports from: React, React Router, auth services, auth hook, validators, and UI components.
+// Exporta: RegisterPage (registration view).
+// Lo utilizan: src/App.jsx.
+// Depende de: React, React Router, auth services, auth hook, validators, and UI components.

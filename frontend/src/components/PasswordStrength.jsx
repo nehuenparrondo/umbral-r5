@@ -1,5 +1,9 @@
 /**
  * Muestra reglas de contrasena en tiempo real.
+ *
+ * Lectura guiada. Componente reutilizable PasswordStrength. Sus props conectan contenido y
+ * acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
+ * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { CheckCircle2, Circle } from "lucide-react";
 import { evaluatePassword } from "../utils/validators.js";
@@ -37,6 +41,6 @@ export function PasswordStrength({ password }) {
   );
 }
 
-// This file exports: PasswordStrength (password policy feedback component).
-// It is used by: RegisterPage and ProfilePage.
-// It imports from: lucide-react and src/utils/validators.js.
+// Exporta: PasswordStrength (password policy feedback component).
+// Lo utilizan: RegisterPage and ProfilePage.
+// Depende de: lucide-react and src/utils/validators.js.

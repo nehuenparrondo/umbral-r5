@@ -1,5 +1,9 @@
 /**
  * Boton que alterna claro/oscuro.
+ *
+ * Lectura guiada. Parte del sistema visual: comparte colores, tamaños o preferencia de
+ * tema según su implementación. La preferencia de apariencia es independiente de la
+ * autenticación y de los datos de las tareas.
  */
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../hooks/useTheme.js";
@@ -22,6 +26,6 @@ export function ThemeToggle() {
   );
 }
 
-// This file exports: ThemeToggle (light/dark mode control).
-// It is used by: AppShell.
-// It imports from: lucide-react and src/hooks/useTheme.js.
+// Exporta: ThemeToggle (light/dark mode control).
+// Lo utilizan: AppShell.
+// Depende de: lucide-react and src/hooks/useTheme.js.

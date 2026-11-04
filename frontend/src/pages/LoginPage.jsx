@@ -1,5 +1,9 @@
 /**
  * Formulario de login con validacion local y errores genericos.
+ *
+ * Lectura guiada. Pantalla LoginPage. Coordina presentación y eventos; seguir los
+ * servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los
+ * datos.
  */
 import { LogIn } from "lucide-react";
 import { useState } from "react";
@@ -148,6 +152,6 @@ export function LoginPage() {
   );
 }
 
-// This file exports: LoginPage (login view).
-// It is used by: src/App.jsx.
-// It imports from: React, React Router, auth hook, and form components.
+// Exporta: LoginPage (login view).
+// Lo utilizan: src/App.jsx.
+// Depende de: React, React Router, auth hook, and form components.

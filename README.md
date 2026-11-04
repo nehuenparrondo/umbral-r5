@@ -1,5 +1,12 @@
 # Umbral · R5
 
+## Entender el código paso a paso
+
+- [Guía sencilla de funcionamiento](docs/LEER-EL-CODIGO.md): recorrido de los datos, guardado, pantallas y operaciones.
+- [Mapa de archivos y funciones](docs/MAPA-ARCHIVOS-Y-FUNCIONES.md): enlaces al código y conexiones entre módulos.
+
+Los comentarios dentro de los archivos explican las decisiones y efectos importantes en español. La documentación distingue ejecución normal, demo y límites pendientes; no contiene claves privadas.
+
 Sistema de cuentas con **React + Vite en frontend/** y **Node.js + Express + MySQL en backend/**. Incluye registro con verificación, login tradicional y social, recuperación de contraseña, perfil, cambio de email y administración con auditoría.
 
 La interfaz fue rediseñada con identidad propia: azul noche, lavanda y acentos menta; tipografía editorial, formularios consistentes y versiones móvil/escritorio. Se conserva el modo claro y la preferencia de tema.

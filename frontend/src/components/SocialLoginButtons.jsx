@@ -1,5 +1,9 @@
 /**
  * Muestra botones sociales responsive y navega al inicio OAuth real del backend.
+ *
+ * Lectura guiada. Botones de redirección, no formularios de contraseña de la red social.
+ * Consulta disponibilidad, evita dobles activaciones y delega la autenticación al
+ * proveedor externo.
  */
 import { useEffect, useState } from "react";
 import { FaDiscord, FaGithub, FaGoogle } from "react-icons/fa6";
@@ -122,6 +126,6 @@ export function SocialLoginButtons() {
   );
 }
 
-// This file exports: SocialLoginButtons.
-// It is used by: LoginPage and RegisterPage.
-// It imports from: React, react-icons and authService.
+// Exporta: SocialLoginButtons.
+// Lo utilizan: LoginPage and RegisterPage.
+// Depende de: React, react-icons and authService.

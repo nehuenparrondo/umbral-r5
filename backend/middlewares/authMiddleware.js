@@ -1,6 +1,10 @@
 /**
  * Protege rutas con JWT, sesion activa, CSRF y rol admin. Resuelve control real del
  * backend, no del front.
+ *
+ * Lectura guiada. Guardas reales del servidor: firma/sesión activa, CSRF y rol. Un
+ * ProtectedRoute del frontend mejora navegación, pero no reemplaza estas comprobaciones de
+ * cada endpoint.
  */
 import { ACCESS_COOKIE_NAME } from "../config/cookies.js";
 import { findActiveSessionById } from "../models/sessionModel.js";
@@ -10,6 +14,10 @@ import { verifyAccessToken } from "../services/tokenService.js";
 
 const safeMethods = new Set(["GET", "HEAD", "OPTIONS"]);
 
+/**
+ * Resuelve la cookie de acceso y exige tanto JWT válido como sesión activa. Añade usuario
+ * y credencial comprobados a req para las rutas siguientes.
+ */
 export const requireAuth = async (req, _res, next) => {
   try {
     // Lee el access token desde cookie httpOnly; no desde localStorage ni body.
@@ -53,6 +61,10 @@ export const requireAuth = async (req, _res, next) => {
   }
 };
 
+/**
+ * En solicitudes que modifican datos exige la prueba CSRF asociada a la sesión. Tener
+ * cookies en el navegador no es suficiente para autorizar una petición de otro sitio.
+ */
 export const requireCsrfToken = (req, _res, next) => {
   // GET/HEAD/OPTIONS no modifican estado, por eso no requieren CSRF.
   if (safeMethods.has(req.method)) {
@@ -71,6 +83,10 @@ export const requireCsrfToken = (req, _res, next) => {
   next();
 };
 
+/**
+ * Construye una guarda de rol para las rutas administrativas. El rol enviado en un
+ * formulario no sustituye al obtenido de la sesión autenticada.
+ */
 export const requireRole = (role) => (req, _res, next) => {
   // El rol sale del usuario autenticado por backend, no de un valor del front.
   if (req.user?.role !== role) {
@@ -81,6 +97,6 @@ export const requireRole = (role) => (req, _res, next) => {
   next();
 };
 
-// This file exports: requireAuth, requireCsrfToken, requireRole.
-// It is used by: protected profile/admin/auth routes.
-// It imports from: backend cookies, token service, models, and errors.
+// Exporta: requireAuth, requireCsrfToken, requireRole.
+// Lo utilizan: protected profile/admin/auth routes.
+// Depende de: backend cookies, token service, models, and errors.

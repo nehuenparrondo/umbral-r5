@@ -1,5 +1,9 @@
 /**
  * Define endpoints protegidos del perfil propio y cambio de contrasena.
+ *
+ * Lectura guiada. Tabla de endpoints: conecta método/ruta con validaciones, permisos y
+ * controlador. La ruta recibe solicitudes HTTP; los modelos y servicios contienen el
+ * trabajo sobre datos.
  */
 import { Router } from "express";
 import {
@@ -62,6 +66,6 @@ router.post(
 
 export default router;
 
-// This file exports: userRoutes router.
-// It is used by: backend/app.js under /api/users.
-// It imports from: user controllers, auth/validation middlewares, validators, and errors.
+// Exporta: userRoutes router.
+// Lo utilizan: backend/app.js under /api/users.
+// Depende de: user controllers, auth/validation middlewares, validators, and errors.

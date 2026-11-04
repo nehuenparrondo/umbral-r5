@@ -1,5 +1,9 @@
 /**
  * Conserva registro/login R3 con Mailtrap y comparte la misma sesion con OAuth.
+ *
+ * Lectura guiada. Coordina registro, login, renovación y cierre de sesión. Une
+ * validaciones, modelos, bcrypt, auditoría y cookies; el alta tradicional requiere
+ * confirmar email antes de abrir una sesión.
  */
 import bcrypt from "bcrypt";
 import { randomBytes } from "node:crypto";
@@ -57,6 +61,11 @@ export const clearAuthCookies = (res) => {
 };
 
 // Un unico emisor de sesiones sirve al login tradicional, codigos y OAuth.
+/**
+ * Recibe usuario público y solicitud; crea una sesión persistida con hash de refresh,
+ * firma el JWT de acceso y devuelve también CSRF. La respuesta HTTP instala las cookies
+ * después.
+ */
 export const issueNewSession = async ({ user, req, client }) => {
   const refreshToken = createRefreshToken();
   const sessionId = await createSession(
@@ -77,6 +86,11 @@ export const issueNewSession = async ({ user, req, client }) => {
   };
 };
 
+/**
+ * Valida disponibilidad, calcula bcrypt y crea la cuenta y su auditoría en una
+ * transacción. Luego solicita verificación por correo; no abre sesión antes de confirmar
+ * el email.
+ */
 export async function register(req, res) {
   // R3 no crea una cuenta tradicional si no hay forma de verificar su email.
   ensureMailConfigured();
@@ -145,6 +159,11 @@ export async function register(req, res) {
   }
 }
 
+/**
+ * Comprueba bcrypt y estado de la cuenta dentro de una transacción. Tres intentos fallidos
+ * pueden bloquearla; solo una cuenta activa, no bloqueada y verificada obtiene sesión y
+ * cookies.
+ */
 export async function login(req, res) {
   const found = await findUserByIdentifierForAuth(req.body.identifier);
 
@@ -240,6 +259,10 @@ export async function login(req, res) {
   res.json({ user: result.user, csrfToken: result.tokens.csrfToken });
 }
 
+/**
+ * Busca el hash de la cookie de renovación, comprueba la cuenta y rota el refresh token.
+ * Devuelve nuevo acceso/CSRF; si la sesión no sirve limpia cookies y rechaza la solicitud.
+ */
 export async function refresh(req, res) {
   const rawToken = req.cookies?.[REFRESH_COOKIE_NAME];
   const session =
@@ -276,6 +299,10 @@ export async function refresh(req, res) {
 export const me = async (req, res) =>
   res.json({ user: req.user, csrfToken: req.auth.csrfToken });
 
+/**
+ * Revoca la sesión del servidor, registra auditoría y elimina las cookies. No borra la
+ * cuenta ni las identidades sociales vinculadas.
+ */
 export async function logout(req, res) {
   await revokeSession(req.auth.sessionId);
   await writeAuditLog({
@@ -299,6 +326,6 @@ export async function checkAvailability(req, res) {
   });
 }
 
-// This file exports: traditional auth handlers and shared session helpers.
-// It is used by: authRoutes, oauthController and codeController.
-// It imports from: cookies, MySQL models, Mailtrap challenges, bcrypt and JWT helpers.
+// Exporta: traditional auth handlers and shared session helpers.
+// Lo utilizan: authRoutes, oauthController and codeController.
+// Depende de: cookies, MySQL models, Mailtrap challenges, bcrypt and JWT helpers.

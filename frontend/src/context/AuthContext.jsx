@@ -1,6 +1,10 @@
 /**
  * Mantiene sesion frontend y sincroniza usuario/CSRF. Resuelve login, registro,
  * logout y usuario autenticado.
+ *
+ * Lectura guiada. Comparte solo el perfil público y el estado de sesión entre páginas. Las
+ * credenciales reales viven en cookies HttpOnly y el CSRF en memoria; al iniciar consulta
+ * /me.
  */
 import {
   createContext,
@@ -118,6 +122,6 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// This file exports: AuthContext and AuthProvider.
-// It is used by: src/main.jsx, src/hooks/useAuth.js, and auth-aware components.
-// It imports from: React hooks, React Router, and auth/api services.
+// Exporta: AuthContext and AuthProvider.
+// Lo utilizan: src/main.jsx, src/hooks/useAuth.js, and auth-aware components.
+// Depende de: React hooks, React Router, and auth/api services.

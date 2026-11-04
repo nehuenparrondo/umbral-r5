@@ -1,5 +1,9 @@
 /**
  * Confirma cambios de email con contrasena local y codigo Mailtrap.
+ *
+ * Lectura guiada. Componente reutilizable EmailChangeForm. Sus props conectan contenido y
+ * acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
+ * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { Check, Mail } from "lucide-react";
 import { useState } from "react";
@@ -126,6 +130,6 @@ export function EmailChangeForm() {
   );
 }
 
-// This file exports: EmailChangeForm.
-// It is used by: ProfilePage.
-// It imports from: Mailtrap code services, session, useForm and controls.
+// Exporta: EmailChangeForm.
+// Lo utilizan: ProfilePage.
+// Depende de: Mailtrap code services, session, useForm and controls.

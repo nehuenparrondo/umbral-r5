@@ -1,6 +1,10 @@
 /**
  * Valida registro, login y disponibilidad en backend. Resuelve no confiar solo en el
  * frontend.
+ *
+ * Lectura guiada. Reglas autoritativas de entrada para la API. Se ejecutan antes del
+ * controlador y convierten campos inválidos en errores HTTP; no dependen de que el
+ * formulario del navegador sea honesto.
  */
 import { body, query } from "express-validator";
 import { validatePasswordStrength } from "../utils/passwordPolicy.js";
@@ -69,6 +73,6 @@ export const availabilityValidation = [
     .withMessage("Username invalido."),
 ];
 
-// This file exports: auth route validation chains.
-// It is used by: backend/routes/authRoutes.js.
-// It imports from: express-validator and backend/utils/passwordPolicy.js.
+// Exporta: auth route validation chains.
+// Lo utilizan: backend/routes/authRoutes.js.
+// Depende de: express-validator and backend/utils/passwordPolicy.js.

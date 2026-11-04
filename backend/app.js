@@ -1,6 +1,10 @@
 /**
  * Configura Express, Helmet, CORS, JSON, rutas API y manejo centralizado de errores.
  * Resuelve seguridad HTTP, CORS, modularidad de rutas y fallback SPA en produccion.
+ *
+ * Lectura guiada. Compone Express: protecciones HTTP, rutas /api, tratamiento de errores y
+ * entrega del frontend compilado en producción. Importar esta composición no equivale a
+ * arrancar el puerto: eso lo hace server.js.
  */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -87,6 +91,6 @@ app.use(errorHandler);
 
 export default app;
 
-// This file exports: configured Express application.
-// It is used by: backend/server.js and potential tests.
-// It imports from: Express security middleware, env config, routes, errors, and error handlers.
+// Exporta: configured Express application.
+// Lo utilizan: backend/server.js and potential tests.
+// Depende de: Express security middleware, env config, routes, errors, and error handlers.

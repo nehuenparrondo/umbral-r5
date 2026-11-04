@@ -1,5 +1,9 @@
 /**
  * Emite y consume codigos de un solo uso para verificar email y recuperar acceso.
+ *
+ * Lectura guiada. Códigos temporales para verificar email, desbloquear y recuperar acceso.
+ * Cada desafío tiene propósito, vencimiento, intentos y estado de envío; no es una
+ * contraseña permanente.
  */
 import {
   createHmac,
@@ -19,6 +23,11 @@ const digest = (id, purpose, code) =>
     .update(`${id}:${purpose}:${code}`)
     .digest("hex");
 
+/**
+ * Genera seis dígitos y guarda un HMAC, no el código legible. Limita solicitudes,
+ * reutiliza un desafío reciente y envía correo fuera de la transacción; si falla, marca el
+ * desafío como fallido.
+ */
 export async function issueChallenge({ userId, purpose, targetEmail }) {
   ensureMailConfigured();
   const id = randomUUID();
@@ -94,6 +103,11 @@ export async function issueChallenge({ userId, purpose, targetEmail }) {
   return result;
 }
 
+/**
+ * Comprueba propósito, destinatario, vencimiento, entrega e intentos con bloqueo SQL.
+ * Ejecuta la operación autorizada y consume el desafío en la misma transacción; un error
+ * revierte las escrituras de esa operación.
+ */
 export async function consumeChallenge(
   { challengeId, purpose, code, expectedUserId },
   operation,
@@ -174,6 +188,6 @@ export const invalidateChallenges = (userId, client = { query }) =>
     [userId],
   );
 
-// This file exports: challenge issuing, consuming and invalidation helpers.
-// It is used by: auth, code and email controllers.
-// It imports from: MySQL, crypto, mail service and the user model.
+// Exporta: challenge issuing, consuming and invalidation helpers.
+// Lo utilizan: auth, code and email controllers.
+// Depende de: MySQL, crypto, mail service and the user model.

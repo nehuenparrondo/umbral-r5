@@ -1,5 +1,9 @@
 /**
  * Cambia el email solamente despues de validar clave local y codigo Mailtrap.
+ *
+ * Lectura guiada. Cambio de correo en dos pasos: solicitar confirmación del nuevo buzón y
+ * consumir un desafío ligado a la cuenta autenticada. Evita confundir el borrador del
+ * formulario con el email persistido.
  */
 import bcrypt from "bcrypt";
 import { writeAuditLog } from "../models/auditLogModel.js";
@@ -83,6 +87,6 @@ export async function confirmEmailChange(req, res) {
   res.json({ user, message: "Email actualizado." });
 }
 
-// This file exports: requestEmailChange and confirmEmailChange.
-// It is used by: userRoutes.
-// It imports from: challenges, user/session/audit models and bcrypt.
+// Exporta: requestEmailChange and confirmEmailChange.
+// Lo utilizan: userRoutes.
+// Depende de: challenges, user/session/audit models and bcrypt.

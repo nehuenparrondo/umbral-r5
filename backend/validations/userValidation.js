@@ -1,5 +1,9 @@
 /**
  * Valida perfil, cambio de contrasena y acciones admin en backend.
+ *
+ * Lectura guiada. Reglas autoritativas de entrada para la API. Se ejecutan antes del
+ * controlador y convierten campos inválidos en errores HTTP; no dependen de que el
+ * formulario del navegador sea honesto.
  */
 import { body, param } from "express-validator";
 import { validatePasswordStrength } from "../utils/passwordPolicy.js";
@@ -74,6 +78,6 @@ export const adminUpdateUserValidation = [
     .withMessage("Estado invalido."),
 ];
 
-// This file exports: profile, password, and admin validation chains.
-// It is used by: user and admin routes.
-// It imports from: express-validator and backend/utils/passwordPolicy.js.
+// Exporta: profile, password, and admin validation chains.
+// Lo utilizan: user and admin routes.
+// Depende de: express-validator and backend/utils/passwordPolicy.js.

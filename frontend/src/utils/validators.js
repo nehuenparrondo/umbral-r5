@@ -1,5 +1,9 @@
 /**
  * Validadores frontend compartidos. Resuelve feedback inmediato de formularios.
+ *
+ * Lectura guiada. Ayudas compartidas para transformar o validar datos. Usarlas desde
+ * varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito
+ * en la interfaz.
  */
 export const usernamePattern = /^[A-Za-z0-9_.]{3,30}$/;
 // Email simple para UX; el backend usa express-validator como autoridad final.
@@ -89,6 +93,6 @@ export const fieldErrorsToObject = (details = []) =>
     return acc;
   }, {});
 
-// This file exports: form validation helpers and password scoring.
-// It is used by: RegisterPage, LoginPage, ProfilePage, and PasswordStrength.
-// It imports from: no project files.
+// Exporta: form validation helpers and password scoring.
+// Lo utilizan: RegisterPage, LoginPage, ProfilePage, and PasswordStrength.
+// Depende de: no project files.

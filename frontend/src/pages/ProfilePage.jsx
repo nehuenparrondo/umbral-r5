@@ -1,5 +1,9 @@
 /**
  * Reune el perfil completo de R3 y las identidades OAuth vinculadas.
+ *
+ * Lectura guiada. Pantalla ProfilePage. Coordina presentación y eventos; seguir los
+ * servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los
+ * datos.
  */
 import { Link2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -83,6 +87,6 @@ export function ProfilePage() {
   );
 }
 
-// This file exports: ProfilePage.
-// It is used by: App behind ProtectedRoute.
-// It imports from: R3 profile forms, OAuth account service and reusable alerts.
+// Exporta: ProfilePage.
+// Lo utilizan: App behind ProtectedRoute.
+// Depende de: R3 profile forms, OAuth account service and reusable alerts.

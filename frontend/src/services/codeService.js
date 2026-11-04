@@ -1,5 +1,9 @@
 /**
  * Transporta codigos Mailtrap sin guardarlos en el navegador.
+ *
+ * Lectura guiada. Servicio reutilizable de la aplicación. Separa operaciones de datos o
+ * comunicación de la presentación; sus funciones importadas indican si la operación es
+ * local, HTTP o de servidor.
  */
 import { apiRequest } from "./apiClient.js";
 
@@ -14,6 +18,6 @@ export const requestEmailChange = (body) =>
 export const confirmEmailChange = (body) =>
   apiRequest("/api/users/me/email/confirm", { method: "POST", body });
 
-// This file exports: five email-code operations.
-// It is used by: CodePage and EmailChangeForm.
-// It imports from: apiClient.
+// Exporta: five email-code operations.
+// Lo utilizan: CodePage and EmailChangeForm.
+// Depende de: apiClient.

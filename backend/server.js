@@ -1,6 +1,9 @@
 /**
  * Arranca el servidor HTTP y cierra el pool SQL en apagado ordenado. Resuelve
  * ejecucion backend y limpieza de recursos.
+ *
+ * Lectura guiada. Punto de arranque y apagado de Node.js. Usa la configuración validada
+ * para escuchar; no es donde se escribe la lógica de formularios o consultas de usuarios.
  */
 import app from "./app.js";
 import { env } from "./config/env.js";
@@ -43,6 +46,6 @@ const shutdown = async () => {
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
-// This file exports: no named exports; it starts the HTTP server.
-// It is used by: npm run dev:server and npm start.
-// It imports from: backend/app.js, backend/config/env.js, backend/config/db.js.
+// Exporta: no named exports; it starts the HTTP server.
+// Lo utilizan: npm run dev:server and npm start.
+// Depende de: backend/app.js, backend/config/env.js, backend/config/db.js.

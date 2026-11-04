@@ -1,6 +1,10 @@
 /**
  * Contiene consultas parametrizadas de usuarios. Resuelve usuarios, roles, duplicados
  * case-insensitive y respuestas sin password_hash.
+ *
+ * Lectura guiada. Consultas parametrizadas de users. Separa lecturas públicas de lecturas
+ * que requieren el hash de contraseña y traduce columnas SQL al formato de objetos de la
+ * aplicación.
  */
 import { randomUUID } from "node:crypto";
 import { query } from "../config/db.js";
@@ -235,6 +239,6 @@ export const updateUserAdminFields = async (
   return findPublicUserById(id, client);
 };
 
-// This file exports: user persistence functions.
-// It is used by: auth, profile, admin controllers, and admin seed scripts.
-// It imports from: backend/config/db.js, backend/utils/normalizers.js, node:crypto.
+// Exporta: user persistence functions.
+// Lo utilizan: auth, profile, admin controllers, and admin seed scripts.
+// Depende de: backend/config/db.js, backend/utils/normalizers.js, node:crypto.

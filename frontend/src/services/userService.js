@@ -1,5 +1,9 @@
 /**
  * Servicios del perfil propio y cambio de contrasena.
+ *
+ * Lectura guiada. Servicio reutilizable de la aplicación. Separa operaciones de datos o
+ * comunicación de la presentación; sus funciones importadas indican si la operación es
+ * local, HTTP o de servidor.
  */
 import { apiRequest } from "./apiClient.js";
 
@@ -18,6 +22,6 @@ export const changePassword = (passwords) =>
 export const getOAuthAccounts = () =>
   apiRequest("/api/users/me/oauth-accounts");
 
-// This file exports: user profile service functions.
-// It is used by: src/pages/ProfilePage.jsx.
-// It imports from: src/services/apiClient.js.
+// Exporta: user profile service functions.
+// Lo utilizan: src/pages/ProfilePage.jsx.
+// Depende de: src/services/apiClient.js.

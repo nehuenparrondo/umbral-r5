@@ -1,5 +1,9 @@
 /**
  * Mantiene tema claro/oscuro persistido. Resuelve requisito de modo claro/oscuro.
+ *
+ * Lectura guiada. Parte del sistema visual: comparte colores, tamaños o preferencia de
+ * tema según su implementación. La preferencia de apariencia es independiente de la
+ * autenticación y de los datos de las tareas.
  */
 import { createContext, useEffect, useMemo, useState } from "react";
 
@@ -43,6 +47,6 @@ export function ThemeProvider({ children }) {
   );
 }
 
-// This file exports: ThemeContext and ThemeProvider.
-// It is used by: src/main.jsx and src/hooks/useTheme.js.
-// It imports from: React hooks and browser localStorage.
+// Exporta: ThemeContext and ThemeProvider.
+// Lo utilizan: src/main.jsx and src/hooks/useTheme.js.
+// Depende de: React hooks and browser localStorage.

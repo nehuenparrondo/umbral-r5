@@ -1,5 +1,8 @@
 /**
  * Define limites de intentos para auth. Resuelve defensa contra fuerza bruta y spam.
+ *
+ * Lectura guiada. Límites de solicitudes para reducir abuso en operaciones sensibles. La
+ * espera se aplica en el servidor, no solo deshabilitando un botón del navegador.
  */
 import rateLimit from "express-rate-limit";
 import { env } from "../config/env.js";
@@ -66,6 +69,6 @@ export const codeAttemptLimiter = rateLimit({
   handler: jsonRateLimitHandler,
 });
 
-// This file exports: rate-limit middlewares for auth, OAuth and email codes.
-// It is used by: auth routes.
-// It imports from: express-rate-limit.
+// Exporta: rate-limit middlewares for auth, OAuth and email codes.
+// Lo utilizan: auth routes.
+// Depende de: express-rate-limit.

@@ -1,5 +1,9 @@
 /**
  * Publica las rutas genericas de inicio, callback y proveedores OAuth.
+ *
+ * Lectura guiada. Tabla de endpoints: conecta método/ruta con validaciones, permisos y
+ * controlador. La ruta recibe solicitudes HTTP; los modelos y servicios contienen el
+ * trabajo sobre datos.
  */
 import { Router } from "express";
 import {
@@ -18,6 +22,6 @@ router.get("/:provider/callback", oauthLimiter, asyncHandler(oauthCallback));
 
 export default router;
 
-// This file exports: oauthRoutes router.
-// It is used by: backend/app.js under /api/auth/oauth.
-// It imports from: OAuth controller, rate limiter and async handler.
+// Exporta: oauthRoutes router.
+// Lo utilizan: backend/app.js under /api/auth/oauth.
+// Depende de: OAuth controller, rate limiter and async handler.

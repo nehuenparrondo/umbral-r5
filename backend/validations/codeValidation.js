@@ -1,5 +1,9 @@
 /**
  * Valida solicitudes y confirmaciones de codigos antes del controlador.
+ *
+ * Lectura guiada. Reglas autoritativas de entrada para la API. Se ejecutan antes del
+ * controlador y convierten campos inválidos en errores HTTP; no dependen de que el
+ * formulario del navegador sea honesto.
  */
 import { body } from "express-validator";
 import { validatePasswordStrength } from "../utils/passwordPolicy.js";
@@ -42,6 +46,6 @@ export const resetPasswordValidation = [
   }),
 ];
 
-// This file exports: validation chains for email-code flows.
-// It is used by: authRoutes.
-// It imports from: express-validator and the shared password policy.
+// Exporta: validation chains for email-code flows.
+// Lo utilizan: authRoutes.
+// Depende de: express-validator and the shared password policy.

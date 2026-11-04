@@ -21,6 +21,6 @@ export const validateRequest = (req, _res, next) => {
   next(new AppError("Hay datos invalidos.", 422, details));
 };
 
-// This file exports: validateRequest middleware.
-// It is used by: backend route validation chains.
-// It imports from: express-validator and backend/utils/errors.js.
+// Exporta: validateRequest middleware.
+// Lo utilizan: backend route validation chains.
+// Depende de: express-validator and backend/utils/errors.js.

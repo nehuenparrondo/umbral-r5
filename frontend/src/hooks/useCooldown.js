@@ -1,5 +1,9 @@
 /**
  * Muestra la espera visual para reenviar codigos; el limite real queda en backend.
+ *
+ * Lectura guiada. Hook reutilizable que agrupa estado o comportamiento de React. El nombre
+ * use permite reconocer que se consume desde componentes u otros hooks, no como un
+ * endpoint del servidor.
  */
 import { useEffect, useState } from "react";
 
@@ -16,6 +20,6 @@ export function useCooldown() {
   return { seconds, restart: () => setSeconds(60) };
 }
 
-// This file exports: useCooldown.
-// It is used by: CodePage.
-// It imports from: React timers.
+// Exporta: useCooldown.
+// Lo utilizan: CodePage.
+// Depende de: React timers.
