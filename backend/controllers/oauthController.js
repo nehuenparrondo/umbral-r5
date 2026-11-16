@@ -200,7 +200,7 @@ const resolveOAuthUser = async ({ provider, profile, client }) => {
 
 /**
  * Compara cookie/state, consume la transacción, obtiene el perfil y crea o vincula la
- * cuenta con bloqueos SQL. Solo después emite cookies locales y redirige al perfil.
+ * cuenta con bloqueos SQL. Solo después emite cookies locales y abre la bienvenida.
  */
 export const oauthCallback = async (req, res) => {
   const provider = getOAuthProvider(req.params.provider);
@@ -280,7 +280,7 @@ export const oauthCallback = async (req, res) => {
     setAuthCookies(res, result.tokensForApp);
     return res.redirect(
       303,
-      clientUrl(`/perfil?oauth=${encodeURIComponent(provider.id)}`),
+      clientUrl(`/bienvenida?oauth=${encodeURIComponent(provider.id)}`),
     );
   } catch (error) {
     if (error.oauthDiagnostic) {

@@ -114,7 +114,7 @@ export function RegisterPage() {
 
   if (isAuthenticated) {
     // Un usuario logueado no necesita volver a registrarse.
-    return <Navigate to="/perfil" replace />;
+    return <Navigate to="/bienvenida" replace />;
   }
 
   // Errores especificos de duplicados vienen del endpoint de disponibilidad.

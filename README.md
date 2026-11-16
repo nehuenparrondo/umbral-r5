@@ -139,3 +139,4 @@ No ejecutar npm audit fix --force sin evaluar la compatibilidad. La auditoría d
 - [Requisitos originales](docs/CUMPLIMIENTO_REQUERIMIENTOS.md).
 - [Configuración Auth0](docs/CONFIGURAR_AUTH0.md).
 - [Pruebas de usuarios y Mailtrap](docs/PRUEBAS_MANUALES_USUARIOS_Y_MAILTRAP.md).
+- [Bienvenida y perfil simplificado](docs/BIENVENIDA-Y-PERFIL.md).

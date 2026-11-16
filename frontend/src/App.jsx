@@ -13,6 +13,7 @@ import { HomePage } from "./pages/HomePage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { RegisterPage } from "./pages/RegisterPage.jsx";
 import { CodePage } from "./pages/CodePage.jsx";
+import { WelcomePage } from "./pages/WelcomePage.jsx";
 
 // Descarga pantallas privadas al necesitarlas; no sustituye permisos del backend.
 const AdminPage = lazy(() =>
@@ -51,6 +52,14 @@ export default function App() {
           <Route
             path="/recuperar"
             element={<CodePage key="reset" purpose="reset_password" />}
+          />
+          <Route
+            path="/bienvenida"
+            element={
+              <ProtectedRoute>
+                <WelcomePage />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/perfil"

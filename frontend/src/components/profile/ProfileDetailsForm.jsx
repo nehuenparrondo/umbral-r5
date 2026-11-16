@@ -5,7 +5,8 @@
  * y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
  * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
-import { Save, UserRound } from "lucide-react";
+import { Pencil, Save, UserRound } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useForm } from "../../hooks/useForm.js";
 import { updateProfile } from "../../services/userService.js";
@@ -16,9 +17,12 @@ import {
 import { Button } from "../Button.jsx";
 import { FormStatus } from "../FormStatus.jsx";
 import { TextField } from "../TextField.jsx";
+import { Alert } from "../Alert.jsx";
 
 export function ProfileDetailsForm() {
   const { user, updateAuthenticatedUser } = useAuth();
+  const [editing, setEditing] = useState(false);
+  const [saved, setSaved] = useState(false);
   const form = useForm(
     { username: user.username, displayName: user.displayName },
     (values) => ({
@@ -28,9 +32,45 @@ export function ProfileDetailsForm() {
     async (values) => {
       const result = await updateProfile(values);
       updateAuthenticatedUser(result.user);
+      setEditing(false);
+      setSaved(true);
       return { message: "Datos guardados." };
     },
   );
+
+  // La tarjeta muestra datos confirmados. El formulario conserva un borrador separado.
+  if (!editing) {
+    return (
+      <section
+        className="profile-section personal-card"
+        aria-labelledby="profile-name"
+      >
+        <span className="profile-avatar">
+          <UserRound aria-hidden="true" />
+        </span>
+        <p className="eyebrow">MI PERFIL</p>
+        <h2 id="profile-name">{user.displayName || user.username}</h2>
+        <p className="muted-copy">@{user.username}</p>
+        <p>{user.email}</p>
+        {saved ? <Alert type="success">Datos guardados.</Alert> : null}
+        <Button
+          type="button"
+          icon={Pencil}
+          onClick={() => {
+            form.reset({
+              username: user.username,
+              displayName: user.displayName,
+            });
+            form.setStatus(null);
+            setSaved(false);
+            setEditing(true);
+          }}
+        >
+          Editar perfil
+        </Button>
+      </section>
+    );
+  }
 
   return (
     <form
@@ -41,8 +81,8 @@ export function ProfileDetailsForm() {
       <div className="panel-title">
         <UserRound aria-hidden="true" />
         <div>
-          <h2>Datos personales</h2>
-          <p>Rol actual: {user.role}</p>
+          <h2>Editar perfil</h2>
+          <p>Actualizá tus datos y guardá los cambios.</p>
         </div>
       </div>
       <FormStatus form={form} />
@@ -50,17 +90,34 @@ export function ProfileDetailsForm() {
         label="Nombre de usuario"
         autoComplete="username"
         maxLength={30}
+        autoFocus
+        disabled={form.busy}
         {...form.field("username")}
       />
       <TextField
         label="Nombre visible"
         autoComplete="name"
         maxLength={80}
+        disabled={form.busy}
         {...form.field("displayName")}
       />
-      <Button type="submit" icon={Save} loading={form.busy}>
-        Guardar cambios
-      </Button>
+      <div className="form-actions">
+        <Button type="submit" icon={Save} loading={form.busy}>
+          Guardar cambios
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={form.busy}
+          onClick={() => {
+            form.reset();
+            form.setStatus(null);
+            setEditing(false);
+          }}
+        >
+          Cancelar
+        </Button>
+      </div>
     </form>
   );
 }

@@ -76,7 +76,7 @@ export function AuthProvider({ children }) {
       // loginUser llama a /api/auth/login y recibe usuario + CSRF.
       const payload = await loginUser(credentials);
       applySession(payload);
-      navigate(payload.user.role === "admin" ? "/admin" : "/perfil", {
+      navigate("/bienvenida", {
         replace: true,
       });
       return payload;

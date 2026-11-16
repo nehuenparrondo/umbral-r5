@@ -44,7 +44,7 @@ const oauthErrors = {
 };
 
 export function LoginPage() {
-  const { isAuthenticated, isAdmin, login } = useAuth();
+  const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -55,7 +55,7 @@ export function LoginPage() {
   const oauthError = oauthErrors[searchParams.get("error")] || "";
 
   if (isAuthenticated) {
-    return <Navigate to={isAdmin ? "/admin" : "/perfil"} replace />;
+    return <Navigate to="/bienvenida" replace />;
   }
 
   const updateValue = (field) => (event) => {

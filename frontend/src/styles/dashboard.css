@@ -1,4 +1,74 @@
 /* Paneles privados: grillas fluidas y tablas desplazables sin desbordar la página. */
+/* Bienvenida y tarjeta simples, con edición separada como en el ejercicio R1. */
+.welcome-panel {
+  width: min(100%, 620px);
+  margin: 48px auto;
+  gap: 18px;
+  text-align: center;
+  justify-items: center;
+}
+.welcome-panel h1 {
+  font-size: clamp(28px, 4vw, 42px);
+  overflow-wrap: anywhere;
+}
+.welcome-panel p,
+.personal-card p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.welcome-panel .button {
+  margin-top: 14px;
+}
+.welcome-panel .button svg {
+  width: 18px;
+  height: 18px;
+}
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 24px;
+  color: var(--accent);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+}
+.profile-avatar svg {
+  width: 36px;
+  height: 36px;
+}
+.simple-profile {
+  display: grid;
+  gap: 22px;
+  width: min(100%, 760px);
+  margin: 0 auto;
+}
+.personal-card {
+  justify-items: start;
+  gap: 14px;
+}
+.personal-card h2 {
+  font-size: clamp(24px, 4vw, 32px);
+  overflow-wrap: anywhere;
+}
+.personal-card .button {
+  margin-top: 10px;
+}
+.profile-options > summary {
+  cursor: pointer;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  font-weight: 600;
+}
+.profile-options[open] > summary {
+  margin-bottom: 16px;
+}
+.profile-options > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
 .profile-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

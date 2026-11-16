@@ -78,7 +78,7 @@ export function CodePage({ purpose }) {
 
       if (result.user) {
         applySession(result);
-        navigate(result.user.role === "admin" ? "/admin" : "/perfil", {
+        navigate("/bienvenida", {
           replace: true,
         });
       } else {

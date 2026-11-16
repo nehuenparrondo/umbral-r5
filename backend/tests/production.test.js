@@ -42,7 +42,7 @@ test(
     await context.test(
       "React se sirve en la raíz y en rutas profundas con recursos y cabeceras",
       async () => {
-        for (const route of ["/", "/login", "/perfil", "/recuperar"]) {
+        for (const route of ["/", "/login", "/bienvenida", "/perfil", "/recuperar"]) {
           const response = await fetch(base + route);
           assert.equal(response.status, 200);
           assert.match(response.headers.get("content-type"), /text\/html/);

@@ -9,6 +9,7 @@
  */
 import {
   Fingerprint,
+  Home,
   LockKeyhole,
   LogOut,
   ShieldCheck,
@@ -24,7 +25,7 @@ export function AppShell({ children }) {
   const { isAuthenticated, isAdmin, logout, user, sessionError } = useAuth();
   const { pathname } = useLocation();
   const isPublicScreen =
-    !isAuthenticated && pathname !== "/perfil" && pathname !== "/admin";
+    !isAuthenticated && !["/bienvenida", "/perfil", "/admin"].includes(pathname);
 
   return (
     <div className="app-shell">
@@ -44,6 +45,10 @@ export function AppShell({ children }) {
 
         {isAuthenticated ? (
           <nav className="nav" aria-label="Navegación principal">
+            <NavLink to="/bienvenida" className="nav__link">
+              <Home aria-hidden="true" />
+              <span>Bienvenida</span>
+            </NavLink>
             <NavLink to="/perfil" className="nav__link" aria-label="Perfil">
               <User aria-hidden="true" />
               <span>Mi perfil</span>

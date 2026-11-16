@@ -9,10 +9,10 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
 
 export function HomePage() {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated } = useAuth();
   return (
     <Navigate
-      to={isAuthenticated ? (isAdmin ? "/admin" : "/perfil") : "/login"}
+      to={isAuthenticated ? "/bienvenida" : "/login"}
       replace
     />
   );
