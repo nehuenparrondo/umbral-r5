@@ -18,6 +18,11 @@ import { AppError } from "../utils/errors.js";
 import { ensureMailConfigured, sendCode } from "./mailService.js";
 
 // El HMAC impide recuperar codigos de seis digitos enumerando hashes simples.
+/**
+ * Calcula HMAC-SHA256 del id, propósito y código con el secreto del servidor.
+ * Vincula el resumen al desafío y evita almacenar los seis dígitos en texto legible; no es el hash
+ * bcrypt de la contraseña.
+ */
 const digest = (id, purpose, code) =>
   createHmac("sha256", env.jwtSecret)
     .update(`${id}:${purpose}:${code}`)
@@ -116,6 +121,10 @@ export async function consumeChallenge(
     'SELECT user_id AS "userId" FROM auth_challenges WHERE id = ?',
     [challengeId],
   );
+  /**
+   * Construye el mismo error 400 por código incorrecto, vencido o consumido.
+   * El detalle apunta al campo code sin revelar cuál de las condiciones internas falló.
+   */
   const invalid = () =>
     new AppError("Codigo incorrecto, vencido o ya utilizado.", 400, [
       { field: "code", message: "Revisa el codigo o solicita otro." },
@@ -161,6 +170,8 @@ export async function consumeChallenge(
          WHERE id = ?`,
         [challengeId],
       );
+      // No lanzar todavía: el contador del intento fallido debe confirmarse en SQL.
+      // Después del commit se transforma este resultado en el error público del código.
       return { error: true };
     }
 
@@ -181,6 +192,10 @@ export async function consumeChallenge(
 }
 
 // Invalida todos los desafios vivos despues de un cambio sensible.
+/**
+ * Marca consumidos todos los desafíos vivos del usuario. Con client revierte también si falla la
+ * transacción sensible que los invalida.
+ */
 export const invalidateChallenges = (userId, client = { query }) =>
   client.query(
     `UPDATE auth_challenges SET consumed_at = now()
@@ -188,6 +203,3 @@ export const invalidateChallenges = (userId, client = { query }) =>
     [userId],
   );
 
-// Exporta: challenge issuing, consuming and invalidation helpers.
-// Lo utilizan: auth, code and email controllers.
-// Depende de: MySQL, crypto, mail service and the user model.

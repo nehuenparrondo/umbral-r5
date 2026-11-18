@@ -8,6 +8,10 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
 
+/**
+ * Presenta la portada y enlaces de entrada del sistema. La sesión compartida permite adaptar el
+ * acceso sin implementar aquí el login.
+ */
 export function HomePage() {
   const { isAuthenticated } = useAuth();
   return (
@@ -18,6 +22,3 @@ export function HomePage() {
   );
 }
 
-// Exporta: HomePage redirect component.
-// Lo utilizan: App.
-// Depende de: React Router and the authentication context.

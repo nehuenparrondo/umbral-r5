@@ -1,7 +1,6 @@
 /**
- * Guía de lectura. Componente reutilizable AuditActivity. Sus props conectan contenido y
- * acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
- * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
+ * Panel de actividad de R5. Consulta páginas de auditoría, aplica el filtro de acción y presenta
+ * los eventos autorizados por el backend.
  */
 
 // Requisito 8.11: historial visible solo para administradores autenticados.
@@ -23,6 +22,12 @@ const labels = {
   ADMIN_VIEW_AUDIT: "Consulta de actividad",
 };
 
+/**
+ * Mantiene página/filtro y consulta eventos administrativos. Al cambiar filtro vuelve a la primera
+ * página.
+ * Cancela la petición anterior al cambiar criterios o desmontarse para no mostrar resultados
+ * viejos; las respuestas solo incluyen datos autorizados.
+ */
 export function AuditActivity() {
   const [page, setPage] = useState(1);
   const [action, setAction] = useState("");

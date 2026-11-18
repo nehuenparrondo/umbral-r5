@@ -22,6 +22,3 @@ router.get("/:provider/callback", oauthLimiter, asyncHandler(oauthCallback));
 
 export default router;
 
-// Exporta: oauthRoutes router.
-// Lo utilizan: backend/app.js under /api/auth/oauth.
-// Depende de: OAuth controller, rate limiter and async handler.

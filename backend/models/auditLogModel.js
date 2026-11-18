@@ -8,6 +8,12 @@
  */
 import { query } from "../config/db.js";
 
+/**
+ * Inserta acción, actor, destinatario, IP, navegador y metadatos serializados.
+ * El llamador debe excluir contraseñas, códigos y tokens de metadata: esta función no los elimina
+ * automáticamente.
+ * Pasar el client de la transacción permite confirmar el evento junto con el cambio que describe.
+ */
 export const writeAuditLog = async (
   { actorUserId = null, action, targetUserId = null, req, metadata = {} },
   client = { query },
@@ -26,6 +32,12 @@ export const writeAuditLog = async (
   );
 };
 
+/**
+ * Lee eventos ordenados por fecha/id descendentes y calcula el total con filtro opcional de acción.
+ * Devuelve eventos paginados con nombres de actor/destinatario; no incluye el JSON interno de
+ * metadatos.
+ * La autorización administrativa y los límites de página corresponden a la ruta/controlador.
+ */
 export async function listAuditLogs({ page, pageSize, action }) {
   // Solo columnas utiles: nunca hashes de contrasena, tokens o metadata interna.
   const { rows } = await query(
@@ -45,6 +57,3 @@ export async function listAuditLogs({ page, pageSize, action }) {
   return { events: rows, total: count.rows[0].total, page, pageSize };
 }
 
-// Exporta: writeAuditLog.
-// Lo utilizan: auth, profile, and admin controllers.
-// Depende de: backend/config/db.js.

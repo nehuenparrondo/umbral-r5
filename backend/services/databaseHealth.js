@@ -1,12 +1,16 @@
 /**
- * Guía de lectura. Servicio reutilizable de la aplicación. Separa operaciones de datos o
- * comunicación de la presentación; sus funciones importadas indican si la operación es
- * local, HTTP o de servidor.
+ * Comprobación de infraestructura de R5. Consulta columnas de sus ocho tablas y traduce fallos de
+ * conexión, esquema o permisos a diagnósticos de arranque.
  */
 
 // Requisito 10: comprobar el servicio SQL real, no solo que Express responda.
 import { query } from "../config/db.js";
 
+/**
+ * Comprueba conexión y columnas necesarias de las ocho tablas con SELECT LIMIT 0, sin leer cuentas.
+ * Resuelve al estar listo el esquema o propaga el error SQL; server espera esta comprobación antes
+ * de escuchar.
+ */
 export async function checkDatabase() {
   // LIMIT 0 verifica conexion, tablas y permisos sin leer datos personales.
   await query("SELECT id FROM users LIMIT 0");
@@ -19,6 +23,11 @@ export async function checkDatabase() {
   await query("SELECT id FROM audit_logs LIMIT 0");
 }
 
+/**
+ * Convierte códigos SQL habituales en instrucciones de diagnóstico local sin imprimir la conexión
+ * ni su contraseña.
+ * Devuelve texto para el arranque; no repara la base ni reintenta conectarse.
+ */
 export function databaseHelp(error) {
   // Codigos tecnicos se traducen solo para la terminal del desarrollador.
   if (error.code === "ER_ACCESS_DENIED_ERROR")

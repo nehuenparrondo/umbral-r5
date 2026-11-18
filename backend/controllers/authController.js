@@ -1,5 +1,5 @@
 /**
- * Conserva registro/login R3 con Mailtrap y comparte la misma sesion con OAuth.
+ * Registro e ingreso de R5 con correo Mailtrap y sesiones compartidas con OAuth.
  *
  * Lectura guiada. Coordina registro, login, renovación y cierre de sesión. Une
  * validaciones, modelos, bcrypt, auditoría y cookies; el alta tradicional requiere
@@ -50,11 +50,22 @@ const dummyPasswordHash = bcrypt.hashSync(
   env.bcryptSaltRounds,
 );
 
+/**
+ * Coloca accessToken y refreshToken en cookies con las opciones privadas definidas en
+ * config/cookies.
+ * El navegador las envía automáticamente; el JSON público de sesión entrega perfil y CSRF, no estas
+ * credenciales.
+ */
 export const setAuthCookies = (res, { accessToken, refreshToken }) => {
   res.cookie(ACCESS_COOKIE_NAME, accessToken, accessCookieOptions);
   res.cookie(REFRESH_COOKIE_NAME, refreshToken, refreshCookieOptions);
 };
 
+/**
+ * Expira ambas cookies de autenticación usando sus opciones correspondientes.
+ * Solo limpia el navegador: la revocación en SQL debe hacerse además en la operación que cierre o
+ * invalide la sesión.
+ */
 export const clearAuthCookies = (res) => {
   res.clearCookie(ACCESS_COOKIE_NAME, expiredAccessCookieOptions);
   res.clearCookie(REFRESH_COOKIE_NAME, expiredRefreshCookieOptions);
@@ -89,10 +100,11 @@ export const issueNewSession = async ({ user, req, client }) => {
 /**
  * Valida disponibilidad, calcula bcrypt y crea la cuenta y su auditoría en una
  * transacción. Luego solicita verificación por correo; no abre sesión antes de confirmar
- * el email.
+ * el email. El envío ocurre después del commit: si falla el correo, la cuenta queda creada
+ * sin verificar y se devuelve una indicación para solicitar otro código.
  */
 export async function register(req, res) {
-  // R3 no crea una cuenta tradicional si no hay forma de verificar su email.
+  // El alta tradicional requiere un transporte de correo para verificar el email.
   ensureMailConfigured();
   const email = normalizeIdentifier(req.body.email);
   const username = normalizeIdentifier(req.body.username);
@@ -135,7 +147,7 @@ export async function register(req, res) {
     return created;
   });
 
-  // El registro termina en la pantalla de codigo; la sesion nace al verificar.
+  // El alta requiere confirmar email; después el usuario vuelve al login para abrir sesión.
   try {
     const challenge = await issueChallenge({
       userId: user.id,
@@ -296,6 +308,10 @@ export async function refresh(req, res) {
   res.json({ user, csrfToken });
 }
 
+/**
+ * Devuelve {user, csrfToken} preparados por requireAuth. No vuelve a comprobar la contraseña ni
+ * devuelve passwordHash.
+ */
 export const me = async (req, res) =>
   res.json({ user: req.user, csrfToken: req.auth.csrfToken });
 
@@ -315,7 +331,14 @@ export async function logout(req, res) {
   res.status(204).send();
 }
 
+/**
+ * Consulta email/username recibidos por query y responde disponibilidad; los campos no enviados
+ * devuelven null.
+ * Es una ayuda del registro: otra petición podría adelantarse, por eso los índices únicos SQL
+ * vuelven a impedir duplicados al guardar.
+ */
 export async function checkAvailability(req, res) {
+  // Es una ayuda visual del registro. Los índices únicos SQL siguen resolviendo las carreras.
   const duplicate = await findDuplicates({
     email: req.query.email || "",
     username: req.query.username || "",
@@ -326,6 +349,3 @@ export async function checkAvailability(req, res) {
   });
 }
 
-// Exporta: traditional auth handlers and shared session helpers.
-// Lo utilizan: authRoutes, oauthController and codeController.
-// Depende de: cookies, MySQL models, Mailtrap challenges, bcrypt and JWT helpers.

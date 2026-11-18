@@ -1,1108 +1,135 @@
-# R5 · Mapa del código activo
+# R5 · Mapa de archivos y funciones
 
-[Empezar por la explicación sencilla](LEER-EL-CODIGO.md). Este índice ayuda a ubicar piezas; no hace falta leerlo de principio a fin. Las líneas corresponden a esta revisión y pueden desplazarse si se edita el archivo.
+Revisión del 17 de noviembre de 2026. Los enlaces señalan las declaraciones después de ampliar los comentarios del código.
+
+Leer primero [la guía completa](LEER-EL-CODIGO.md). En cada función, el comentario explica su responsabilidad y sus efectos; las funciones interiores también aparecen para localizar eventos y callbacks.
 
 ## backend
 
-### [backend/app.js](../backend/app.js)
-
-Compone Express: protecciones HTTP, rutas /api, tratamiento de errores y entrega del frontend compilado en producción. Importar esta composición no equivale a arrancar el puerto: eso lo hace server.js.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js), [backend/routes/adminRoutes.js](../backend/routes/adminRoutes.js), [backend/routes/authRoutes.js](../backend/routes/authRoutes.js), [backend/routes/oauthRoutes.js](../backend/routes/oauthRoutes.js), [backend/routes/userRoutes.js](../backend/routes/userRoutes.js), [backend/middlewares/errorHandler.js](../backend/middlewares/errorHandler.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/services/databaseHealth.js](../backend/services/databaseHealth.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/config/cookies.js](../backend/config/cookies.js)
-
-Política común de cookies de acceso y renovación. La configuración debe coincidir al crearlas y borrarlas; las cookies de sesión no son datos de perfil editables.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/config/db.js](../backend/config/db.js)
-
-Pool MySQL y adaptador del resultado de las consultas. Usa parámetros y transacciones; la base puede estar en Aiven con TLS o en la configuración local, sin cambiar los modelos.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js).
-
-**Funciones para buscar:**
-
-- [`mysqlConnectionOptions` · línea 11](../backend/config/db.js#L11)
-- [`wrapMySQLConnection` · línea 38](../backend/config/db.js#L38)
-- [`query` · línea 77](../backend/config/db.js#L77)
-- [`withTransaction` · línea 83](../backend/config/db.js#L83): Entrega una conexión a una operación y coordina commit/rollback y liberación. Todas sus consultas deben usar ese client para pertenecer a la misma transacción.
-
-### [backend/config/env.js](../backend/config/env.js)
-
-Lee y valida la configuración privada del backend. Un nombre de variable no es su valor secreto; las claves se cargan desde entorno/.env y nunca deben copiarse a la interfaz.
-
-**Funciones para buscar:**
-
-- [`toInteger` · línea 16](../backend/config/env.js#L16)
-- [`toBoolean` · línea 22](../backend/config/env.js#L22)
-- [`required` · línea 28](../backend/config/env.js#L28)
-- [`optional` · línea 37](../backend/config/env.js#L37)
-
-### [backend/config/oauthProviders.js](../backend/config/oauthProviders.js)
-
-Describe los proveedores y devuelve al frontend solo su disponibilidad pública. Google/GitHub se configuran mediante Auth0 y Discord por su integración; los secretos permanecen del lado del servidor.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js).
-
-**Funciones para buscar:**
-
-- [`redirectUri` · línea 11](../backend/config/oauthProviders.js#L11)
-- [`configured` · línea 14](../backend/config/oauthProviders.js#L14)
-- [`provider` · línea 17](../backend/config/oauthProviders.js#L17)
-- [`auth0SubjectId` · línea 32](../backend/config/oauthProviders.js#L32)
-- [`auth0Provider` · línea 39](../backend/config/oauthProviders.js#L39)
-- [`getOAuthProvider` · línea 251](../backend/config/oauthProviders.js#L251)
-- [`listPublicOAuthProviders` · línea 254](../backend/config/oauthProviders.js#L254)
-
-### [backend/controllers/adminController.js](../backend/controllers/adminController.js)
-
-Listado/edición administrativa y consulta de auditoría. Los permisos se exigen en las rutas; los cambios de rol y estado no son simples preferencias visuales.
-
-**Se conecta con:** [backend/models/auditLogModel.js](../backend/models/auditLogModel.js), [backend/models/userModel.js](../backend/models/userModel.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/config/db.js](../backend/config/db.js), [backend/models/sessionModel.js](../backend/models/sessionModel.js).
-
-**Funciones para buscar:**
-
-- [`toPageNumber` · línea 15](../backend/controllers/adminController.js#L15)
-- [`getUsers` · línea 20](../backend/controllers/adminController.js#L20)
-- [`updateUserAsAdmin` · línea 35](../backend/controllers/adminController.js#L35)
-- [`getAuditLogs` · línea 80](../backend/controllers/adminController.js#L80)
-
-### [backend/controllers/authController.js](../backend/controllers/authController.js)
-
-Coordina registro, login, renovación y cierre de sesión. Une validaciones, modelos, bcrypt, auditoría y cookies; el alta tradicional requiere confirmar email antes de abrir una sesión.
-
-**Se conecta con:** [backend/config/cookies.js](../backend/config/cookies.js), [backend/config/db.js](../backend/config/db.js), [backend/config/env.js](../backend/config/env.js), [backend/models/auditLogModel.js](../backend/models/auditLogModel.js), [backend/models/sessionModel.js](../backend/models/sessionModel.js), [backend/models/userModel.js](../backend/models/userModel.js), [backend/services/challengeService.js](../backend/services/challengeService.js), [backend/services/mailService.js](../backend/services/mailService.js), [backend/services/tokenService.js](../backend/services/tokenService.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/utils/normalizers.js](../backend/utils/normalizers.js).
-
-**Funciones para buscar:**
-
-- [`setAuthCookies` · línea 53](../backend/controllers/authController.js#L53)
-- [`clearAuthCookies` · línea 58](../backend/controllers/authController.js#L58)
-- [`issueNewSession` · línea 69](../backend/controllers/authController.js#L69): Recibe usuario público y solicitud; crea una sesión persistida con hash de refresh, firma el JWT de acceso y devuelve también CSRF. La respuesta HTTP instala las cookies después.
-- [`register` · línea 94](../backend/controllers/authController.js#L94): Valida disponibilidad, calcula bcrypt y crea la cuenta y su auditoría en una transacción. Luego solicita verificación por correo; no abre sesión antes de confirmar el email.
-- [`login` · línea 167](../backend/controllers/authController.js#L167): Comprueba bcrypt y estado de la cuenta dentro de una transacción. Tres intentos fallidos pueden bloquearla; solo una cuenta activa, no bloqueada y verificada obtiene sesión y cookies.
-- [`refresh` · línea 266](../backend/controllers/authController.js#L266): Busca el hash de la cookie de renovación, comprueba la cuenta y rota el refresh token. Devuelve nuevo acceso/CSRF; si la sesión no sirve limpia cookies y rechaza la solicitud.
-- [`me` · línea 299](../backend/controllers/authController.js#L299)
-- [`logout` · línea 306](../backend/controllers/authController.js#L306): Revoca la sesión del servidor, registra auditoría y elimina las cookies. No borra la cuenta ni las identidades sociales vinculadas.
-- [`checkAvailability` · línea 318](../backend/controllers/authController.js#L318)
-
-### [backend/controllers/codeController.js](../backend/controllers/codeController.js)
-
-Recibe códigos de email y coordina verificación, desbloqueo o contraseña nueva. Usa los desafíos del servidor; no acepta que el navegador declare por sí mismo un email verificado.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js), [backend/models/auditLogModel.js](../backend/models/auditLogModel.js), [backend/models/sessionModel.js](../backend/models/sessionModel.js), [backend/models/userModel.js](../backend/models/userModel.js), [backend/controllers/authController.js](../backend/controllers/authController.js), [backend/services/challengeService.js](../backend/services/challengeService.js), [backend/services/mailService.js](../backend/services/mailService.js), [backend/utils/errors.js](../backend/utils/errors.js).
-
-**Funciones para buscar:**
-
-- [`requestCode` · línea 35](../backend/controllers/codeController.js#L35): Recibe identificador y propósito y responde con formato uniforme incluso si la cuenta no existe. Solicita un correo únicamente cuando esa cuenta reúne las condiciones.
-- [`confirmCode` · línea 72](../backend/controllers/codeController.js#L72): Consume el desafío según su propósito. Verificar email regresa al login; desbloquear puede abrir una nueva sesión. No tratar ambos resultados como si fueran iguales.
-- [`resetPassword` · línea 123](../backend/controllers/codeController.js#L123): Consume un desafío reset_password, guarda bcrypt de la nueva contraseña y revoca sesiones y desafíos anteriores. Al terminar exige iniciar sesión otra vez.
-
-### [backend/controllers/emailController.js](../backend/controllers/emailController.js)
-
-Cambio de correo en dos pasos: solicitar confirmación del nuevo buzón y consumir un desafío ligado a la cuenta autenticada. Evita confundir el borrador del formulario con el email persistido.
-
-**Se conecta con:** [backend/models/auditLogModel.js](../backend/models/auditLogModel.js), [backend/models/sessionModel.js](../backend/models/sessionModel.js), [backend/models/userModel.js](../backend/models/userModel.js), [backend/services/challengeService.js](../backend/services/challengeService.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/utils/normalizers.js](../backend/utils/normalizers.js).
-
-**Funciones para buscar:**
-
-- [`requestEmailChange` · línea 24](../backend/controllers/emailController.js#L24)
-- [`confirmEmailChange` · línea 59](../backend/controllers/emailController.js#L59)
-
-### [backend/controllers/oauthController.js](../backend/controllers/oauthController.js)
-
-Recorrido del login social: iniciar la redirección, validar el retorno y resolver la cuenta local dentro de una transacción. Emite las mismas cookies de Umbral que el login tradicional.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js), [backend/config/oauthProviders.js](../backend/config/oauthProviders.js), [backend/config/db.js](../backend/config/db.js), [backend/models/auditLogModel.js](../backend/models/auditLogModel.js), [backend/models/oauthAccountModel.js](../backend/models/oauthAccountModel.js), [backend/models/oauthStateModel.js](../backend/models/oauthStateModel.js), [backend/models/userModel.js](../backend/models/userModel.js), [backend/controllers/authController.js](../backend/controllers/authController.js), [backend/services/oauthService.js](../backend/services/oauthService.js), [backend/services/tokenService.js](../backend/services/tokenService.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/utils/oauthErrors.js](../backend/utils/oauthErrors.js).
-
-**Funciones para buscar:**
-
-- [`safeEqual` · línea 46](../backend/controllers/oauthController.js#L46)
-- [`clientUrl` · línea 55](../backend/controllers/oauthController.js#L55)
-- [`redirectError` · línea 57](../backend/controllers/oauthController.js#L57)
-- [`listProviders` · línea 75](../backend/controllers/oauthController.js#L75)
-- [`startOAuth` · línea 83](../backend/controllers/oauthController.js#L83): Crea una transacción temporal en SQL, instala una cookie state y redirige a la red. No inicia sesión local hasta completar y validar el retorno.
-- [`resolveOAuthUser` · línea 111](../backend/controllers/oauthController.js#L111): Busca primero proveedor + ID externo. Para vincular por email exige verificación; si registra una cuenta social, su passwordHash es null, no la contraseña de la red.
-- [`oauthCallback` · línea 205](../backend/controllers/oauthController.js#L205): Compara cookie/state, consume la transacción, obtiene el perfil y crea o vincula la cuenta con bloqueos SQL. Solo después emite cookies locales y redirige al perfil.
-
-### [backend/controllers/userController.js](../backend/controllers/userController.js)
-
-Operaciones de perfil y contraseña de la cuenta autenticada. La identidad viene del middleware de sesión; no se permite escoger otro usuario cambiando un campo del formulario.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js), [backend/models/auditLogModel.js](../backend/models/auditLogModel.js), [backend/models/oauthAccountModel.js](../backend/models/oauthAccountModel.js), [backend/models/sessionModel.js](../backend/models/sessionModel.js), [backend/models/userModel.js](../backend/models/userModel.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/utils/normalizers.js](../backend/utils/normalizers.js), [backend/config/db.js](../backend/config/db.js), [backend/services/challengeService.js](../backend/services/challengeService.js).
-
-**Funciones para buscar:**
-
-- [`getProfile` · línea 25](../backend/controllers/userController.js#L25)
-- [`getOAuthAccounts` · línea 29](../backend/controllers/userController.js#L29)
-- [`updateProfile` · línea 34](../backend/controllers/userController.js#L34)
-- [`changePassword` · línea 82](../backend/controllers/userController.js#L82)
-
-### [backend/eslint.config.js](../backend/eslint.config.js)
-
-Configuración del análisis estático de código. Define reglas y archivos revisados; no decide permisos de usuarios ni persistencia.
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/middlewares/authMiddleware.js](../backend/middlewares/authMiddleware.js)
-
-Guardas reales del servidor: firma/sesión activa, CSRF y rol. Un ProtectedRoute del frontend mejora navegación, pero no reemplaza estas comprobaciones de cada endpoint.
-
-**Se conecta con:** [backend/config/cookies.js](../backend/config/cookies.js), [backend/models/sessionModel.js](../backend/models/sessionModel.js), [backend/models/userModel.js](../backend/models/userModel.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/services/tokenService.js](../backend/services/tokenService.js).
-
-**Funciones para buscar:**
-
-- [`requireAuth` · línea 21](../backend/middlewares/authMiddleware.js#L21): Resuelve la cookie de acceso y exige tanto JWT válido como sesión activa. Añade usuario y credencial comprobados a req para las rutas siguientes.
-- [`requireCsrfToken` · línea 68](../backend/middlewares/authMiddleware.js#L68): En solicitudes que modifican datos exige la prueba CSRF asociada a la sesión. Tener cookies en el navegador no es suficiente para autorizar una petición de otro sitio.
-- [`requireRole` · línea 90](../backend/middlewares/authMiddleware.js#L90): Construye una guarda de rol para las rutas administrativas. El rol enviado en un formulario no sustituye al obtenido de la sesión autenticada.
-
-### [backend/middlewares/errorHandler.js](../backend/middlewares/errorHandler.js)
-
-Última traducción de errores a respuestas HTTP legibles. Evita devolver detalles internos innecesarios y centraliza cómo una excepción llega al formulario.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js), [backend/utils/errors.js](../backend/utils/errors.js).
-
-**Funciones para buscar:**
-
-- [`notFoundHandler` · línea 10](../backend/middlewares/errorHandler.js#L10)
-- [`errorHandler` · línea 14](../backend/middlewares/errorHandler.js#L14)
-
-### [backend/middlewares/rateLimiters.js](../backend/middlewares/rateLimiters.js)
-
-Límites de solicitudes para reducir abuso en operaciones sensibles. La espera se aplica en el servidor, no solo deshabilitando un botón del navegador.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js).
-
-**Funciones para buscar:**
-
-- [`jsonRateLimitHandler` · línea 10](../backend/middlewares/rateLimiters.js#L10)
-
-### [backend/middlewares/validateRequest.js](../backend/middlewares/validateRequest.js)
-
-Módulo auxiliar del proyecto. Las importaciones y símbolos siguientes permiten seguir su relación con el resto del código.
-
-**Se conecta con:** [backend/utils/errors.js](../backend/utils/errors.js).
-
-**Funciones para buscar:**
-
-- [`validateRequest` · línea 8](../backend/middlewares/validateRequest.js#L8)
-
-### [backend/models/auditLogModel.js](../backend/models/auditLogModel.js)
-
-Registro y consulta de eventos relevantes. La auditoría permite explicar quién realizó una acción sin guardar contraseñas ni convertirla en una lista editable desde el perfil.
-
-**Se conecta con:** [backend/config/db.js](../backend/config/db.js).
-
-**Funciones para buscar:**
-
-- [`writeAuditLog` · línea 11](../backend/models/auditLogModel.js#L11)
-- [`listAuditLogs` · línea 29](../backend/models/auditLogModel.js#L29)
-
-### [backend/models/oauthAccountModel.js](../backend/models/oauthAccountModel.js)
-
-Vínculos entre usuario local e identidad externa: proveedor + identificador del proveedor. No almacena la contraseña de Google/GitHub/Discord ni sus mensajes.
-
-**Se conecta con:** [backend/config/db.js](../backend/config/db.js).
-
-**Funciones para buscar:**
-
-- [`findOAuthAccount` · línea 10](../backend/models/oauthAccountModel.js#L10)
-- [`createOAuthAccount` · línea 27](../backend/models/oauthAccountModel.js#L27)
-- [`listOAuthAccountsByUserId` · línea 39](../backend/models/oauthAccountModel.js#L39)
-
-### [backend/models/oauthStateModel.js](../backend/models/oauthStateModel.js)
-
-Transacciones temporales de redirección OAuth. El estado se consume una sola vez para relacionar el retorno con el navegador que comenzó el acceso.
-
-**Se conecta con:** [backend/config/db.js](../backend/config/db.js).
-
-**Funciones para buscar:**
-
-- [`createOAuthState` · línea 10](../backend/models/oauthStateModel.js#L10)
-- [`consumeOAuthState` · línea 25](../backend/models/oauthStateModel.js#L25)
-- [`consume` · línea 26](../backend/models/oauthStateModel.js#L26)
-
-### [backend/models/sessionModel.js](../backend/models/sessionModel.js)
-
-Persistencia y revocación de sesiones. Guarda el hash del refresh token y permite rotarlo sin aceptar dos usos simultáneos del mismo valor anterior.
-
-**Se conecta con:** [backend/config/db.js](../backend/config/db.js).
-
-**Funciones para buscar:**
-
-- [`createSession` · línea 11](../backend/models/sessionModel.js#L11)
-- [`findValidSessionByRefreshHash` · línea 31](../backend/models/sessionModel.js#L31)
-- [`findActiveSessionById` · línea 51](../backend/models/sessionModel.js#L51)
-- [`rotateSession` · línea 64](../backend/models/sessionModel.js#L64)
-- [`revokeSession` · línea 83](../backend/models/sessionModel.js#L83)
-- [`revokeUserSessionsExcept` · línea 93](../backend/models/sessionModel.js#L93)
-- [`revokeAllUserSessions` · línea 108](../backend/models/sessionModel.js#L108)
-
-### [backend/models/userModel.js](../backend/models/userModel.js)
-
-Consultas parametrizadas de users. Separa lecturas públicas de lecturas que requieren el hash de contraseña y traduce columnas SQL al formato de objetos de la aplicación.
-
-**Se conecta con:** [backend/config/db.js](../backend/config/db.js), [backend/utils/normalizers.js](../backend/utils/normalizers.js).
-
-**Funciones para buscar:**
-
-- [`findUserByIdentifierForAuth` · línea 52](../backend/models/userModel.js#L52)
-- [`findPublicUserById` · línea 68](../backend/models/userModel.js#L68)
-- [`findPublicUserByEmail` · línea 77](../backend/models/userModel.js#L77)
-- [`findUniqueUsername` · línea 85](../backend/models/userModel.js#L85)
-- [`findUserByIdForPassword` · línea 100](../backend/models/userModel.js#L100)
-- [`findDuplicates` · línea 115](../backend/models/userModel.js#L115)
-- [`createUser` · línea 147](../backend/models/userModel.js#L147)
-- [`updateUserProfile` · línea 172](../backend/models/userModel.js#L172)
-- [`updatePasswordHash` · línea 189](../backend/models/userModel.js#L189)
-- [`listUsers` · línea 202](../backend/models/userModel.js#L202)
-- [`updateUserAdminFields` · línea 225](../backend/models/userModel.js#L225)
-
-### [backend/routes/adminRoutes.js](../backend/routes/adminRoutes.js)
-
-Tabla de endpoints: conecta método/ruta con validaciones, permisos y controlador. La ruta recibe solicitudes HTTP; los modelos y servicios contienen el trabajo sobre datos.
-
-**Se conecta con:** [backend/controllers/adminController.js](../backend/controllers/adminController.js), [backend/middlewares/authMiddleware.js](../backend/middlewares/authMiddleware.js), [backend/middlewares/validateRequest.js](../backend/middlewares/validateRequest.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/validations/userValidation.js](../backend/validations/userValidation.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/routes/authRoutes.js](../backend/routes/authRoutes.js)
-
-Tabla de endpoints: conecta método/ruta con validaciones, permisos y controlador. La ruta recibe solicitudes HTTP; los modelos y servicios contienen el trabajo sobre datos.
-
-**Se conecta con:** [backend/controllers/authController.js](../backend/controllers/authController.js), [backend/controllers/codeController.js](../backend/controllers/codeController.js), [backend/middlewares/authMiddleware.js](../backend/middlewares/authMiddleware.js), [backend/middlewares/rateLimiters.js](../backend/middlewares/rateLimiters.js), [backend/middlewares/validateRequest.js](../backend/middlewares/validateRequest.js), [backend/validations/authValidation.js](../backend/validations/authValidation.js), [backend/validations/codeValidation.js](../backend/validations/codeValidation.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/config/cookies.js](../backend/config/cookies.js).
-
-**Funciones para buscar:**
-
-- [`anonymous` · línea 97](../backend/routes/authRoutes.js#L97)
-
-### [backend/routes/oauthRoutes.js](../backend/routes/oauthRoutes.js)
-
-Tabla de endpoints: conecta método/ruta con validaciones, permisos y controlador. La ruta recibe solicitudes HTTP; los modelos y servicios contienen el trabajo sobre datos.
-
-**Se conecta con:** [backend/controllers/oauthController.js](../backend/controllers/oauthController.js), [backend/middlewares/rateLimiters.js](../backend/middlewares/rateLimiters.js), [backend/utils/errors.js](../backend/utils/errors.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/routes/userRoutes.js](../backend/routes/userRoutes.js)
-
-Tabla de endpoints: conecta método/ruta con validaciones, permisos y controlador. La ruta recibe solicitudes HTTP; los modelos y servicios contienen el trabajo sobre datos.
-
-**Se conecta con:** [backend/controllers/userController.js](../backend/controllers/userController.js), [backend/controllers/emailController.js](../backend/controllers/emailController.js), [backend/middlewares/authMiddleware.js](../backend/middlewares/authMiddleware.js), [backend/middlewares/validateRequest.js](../backend/middlewares/validateRequest.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/validations/userValidation.js](../backend/validations/userValidation.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/scripts/checkMail.js](../backend/scripts/checkMail.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/services/mailService.js](../backend/services/mailService.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/scripts/checkOAuth.js](../backend/scripts/checkOAuth.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js), [backend/config/oauthProviders.js](../backend/config/oauthProviders.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/scripts/createAdmin.js](../backend/scripts/createAdmin.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js), [backend/config/db.js](../backend/config/db.js), [backend/models/userModel.js](../backend/models/userModel.js), [backend/utils/normalizers.js](../backend/utils/normalizers.js), [backend/utils/passwordPolicy.js](../backend/utils/passwordPolicy.js).
-
-**Funciones para buscar:**
-
-- [`requiredAdminEnv` · línea 16](../backend/scripts/createAdmin.js#L16)
-- [`main` · línea 24](../backend/scripts/createAdmin.js#L24)
-
-### [backend/scripts/doctor.js](../backend/scripts/doctor.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/scripts/importPreviousAccounts.js](../backend/scripts/importPreviousAccounts.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/scripts/mysqlPaths.js](../backend/scripts/mysqlPaths.js).
-
-**Funciones para buscar:**
-
-- [`importPreviousAccounts` · línea 6](../backend/scripts/importPreviousAccounts.js#L6)
-
-### [backend/scripts/localMySQL.js](../backend/scripts/localMySQL.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/scripts/mysqlPaths.js](../backend/scripts/mysqlPaths.js).
-
-**Funciones para buscar:**
-
-- [`readMySQLCredentials` · línea 16](../backend/scripts/localMySQL.js#L16)
-- [`localMySQLOptions` · línea 19](../backend/scripts/localMySQL.js#L19)
-- [`startLocalMySQL` · línea 30](../backend/scripts/localMySQL.js#L30)
-- [`ping` · línea 35](../backend/scripts/localMySQL.js#L35)
-- [`stopLocalMySQL` · línea 96](../backend/scripts/localMySQL.js#L96)
-
-### [backend/scripts/localPaths.js](../backend/scripts/localPaths.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/scripts/migrateMySQL.js](../backend/scripts/migrateMySQL.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/scripts/mysqlSchema.js](../backend/scripts/mysqlSchema.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/scripts/mysqlPaths.js](../backend/scripts/mysqlPaths.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/scripts/localPaths.js](../backend/scripts/localPaths.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/scripts/mysqlSchema.js](../backend/scripts/mysqlSchema.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/scripts/mysqlPaths.js](../backend/scripts/mysqlPaths.js).
-
-**Funciones para buscar:**
-
-- [`applyMySQLSchema` · línea 6](../backend/scripts/mysqlSchema.js#L6)
-- [`grantApplicationPrivileges` · línea 19](../backend/scripts/mysqlSchema.js#L19)
-
-### [backend/scripts/prepareDev.js](../backend/scripts/prepareDev.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/scripts/localMySQL.js](../backend/scripts/localMySQL.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/scripts/setupLocal.js](../backend/scripts/setupLocal.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/scripts/mysqlPaths.js](../backend/scripts/mysqlPaths.js), [backend/scripts/localMySQL.js](../backend/scripts/localMySQL.js), [backend/scripts/mysqlSchema.js](../backend/scripts/mysqlSchema.js), [backend/scripts/importPreviousAccounts.js](../backend/scripts/importPreviousAccounts.js).
-
-**Funciones para buscar:**
-
-- [`secret` · línea 21](../backend/scripts/setupLocal.js#L21)
-- [`main` · línea 23](../backend/scripts/setupLocal.js#L23)
-
-### [backend/scripts/stopLocal.js](../backend/scripts/stopLocal.js)
-
-Script de preparación, diagnóstico o mantenimiento. No es una pantalla ni se ejecuta por importarlo desde el navegador; revisar el comando y su destino antes de usarlo porque algunos scripts modifican datos.
-
-**Se conecta con:** [backend/scripts/localMySQL.js](../backend/scripts/localMySQL.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/server.js](../backend/server.js)
-
-Punto de arranque y apagado de Node.js. Usa la configuración validada para escuchar; no es donde se escribe la lógica de formularios o consultas de usuarios.
-
-**Se conecta con:** [backend/app.js](../backend/app.js), [backend/config/env.js](../backend/config/env.js), [backend/config/db.js](../backend/config/db.js), [backend/services/databaseHealth.js](../backend/services/databaseHealth.js).
-
-**Funciones para buscar:**
-
-- [`shutdown` · línea 39](../backend/server.js#L39)
-
-### [backend/services/challengeService.js](../backend/services/challengeService.js)
-
-Códigos temporales para verificar email, desbloquear y recuperar acceso. Cada desafío tiene propósito, vencimiento, intentos y estado de envío; no es una contraseña permanente.
-
-**Se conecta con:** [backend/config/db.js](../backend/config/db.js), [backend/config/env.js](../backend/config/env.js), [backend/models/userModel.js](../backend/models/userModel.js), [backend/utils/errors.js](../backend/utils/errors.js), [backend/services/mailService.js](../backend/services/mailService.js).
-
-**Funciones para buscar:**
-
-- [`digest` · línea 21](../backend/services/challengeService.js#L21)
-- [`issueChallenge` · línea 31](../backend/services/challengeService.js#L31): Genera seis dígitos y guarda un HMAC, no el código legible. Limita solicitudes, reutiliza un desafío reciente y envía correo fuera de la transacción; si falla, marca el desafío como fallido.
-- [`consumeChallenge` · línea 111](../backend/services/challengeService.js#L111): Comprueba propósito, destinatario, vencimiento, entrega e intentos con bloqueo SQL. Ejecuta la operación autorizada y consume el desafío en la misma transacción; un error revierte las escrituras de esa operación.
-- [`invalid` · línea 119](../backend/services/challengeService.js#L119)
-- [`invalidateChallenges` · línea 184](../backend/services/challengeService.js#L184)
-
-### [backend/services/databaseHealth.js](../backend/services/databaseHealth.js)
-
-Servicio reutilizable de la aplicación. Separa operaciones de datos o comunicación de la presentación; sus funciones importadas indican si la operación es local, HTTP o de servidor.
-
-**Se conecta con:** [backend/config/db.js](../backend/config/db.js).
-
-**Funciones para buscar:**
-
-- [`checkDatabase` · línea 10](../backend/services/databaseHealth.js#L10)
-- [`databaseHelp` · línea 22](../backend/services/databaseHealth.js#L22)
-
-### [backend/services/mailService.js](../backend/services/mailService.js)
-
-Transporte de códigos mediante SMTP. Lee configuración privada del servidor; tener un mensaje construido no demuestra que el proveedor haya aceptado enviarlo.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js), [backend/utils/errors.js](../backend/utils/errors.js).
-
-**Funciones para buscar:**
-
-- [`ensureMailConfigured` · línea 18](../backend/services/mailService.js#L18)
-- [`getTransport` · línea 25](../backend/services/mailService.js#L25)
-- [`sendCode` · línea 43](../backend/services/mailService.js#L43)
-- [`verifyMailConnection` · línea 75](../backend/services/mailService.js#L75)
-
-### [backend/services/oauthService.js](../backend/services/oauthService.js)
-
-Protocolo del acceso social: state, PKCE, intercambio de código, verificación OIDC y normalización del perfil. Los tokens externos se usan para consultar identidad, no se guardan como contraseña local.
-
-**Se conecta con:** [backend/utils/errors.js](../backend/utils/errors.js), [backend/utils/normalizers.js](../backend/utils/normalizers.js), [backend/services/tokenService.js](../backend/services/tokenService.js).
-
-**Funciones para buscar:**
-
-- [`base64Url` · línea 19](../backend/services/oauthService.js#L19)
-- [`createPkcePair` · línea 21](../backend/services/oauthService.js#L21)
-- [`createOAuthTransaction` · línea 35](../backend/services/oauthService.js#L35): Genera state y, según proveedor, nonce y PKCE con vencimiento. Son datos de una redirección puntual, no un permiso permanente para entrar a cualquier cuenta.
-- [`oauthStateCookieName` · línea 51](../backend/services/oauthService.js#L51)
-- [`oauthStateCookieOptions` · línea 54](../backend/services/oauthService.js#L54)
-- [`buildAuthorizationUrl` · línea 66](../backend/services/oauthService.js#L66): Construye la dirección externa con callback, scopes y parámetros del proveedor. El cambio de dominio durante el acceso es la redirección normal de OAuth.
-- [`oauthRequestFailure` · línea 89](../backend/services/oauthService.js#L89)
-- [`fetchJson` · línea 100](../backend/services/oauthService.js#L100)
-- [`exchangeCodeForTokens` · línea 198](../backend/services/oauthService.js#L198): Intercambia el código del callback usando credenciales privadas del backend y el verificador PKCE cuando corresponde. Nunca debe ejecutarse con el client secret dentro del navegador.
-- [`verifyOidcToken` · línea 232](../backend/services/oauthService.js#L232)
-- [`fetchNormalizedProfile` · línea 255](../backend/services/oauthService.js#L255): Consulta la identidad externa y la convierte al formato común. Si hay OIDC, compara la identidad firmada con UserInfo antes de entregar el perfil al controlador.
-- [`validateNormalizedProfile` · línea 288](../backend/services/oauthService.js#L288)
-- [`safeUsernameBase` · línea 314](../backend/services/oauthService.js#L314)
-- [`decideOAuthAccountAction` · línea 330](../backend/services/oauthService.js#L330): Decisión pura: usar un vínculo existente, rechazar email ausente/no verificado o permitir vincular/registrar. No escribe SQL; el controlador aplica la decisión.
-
-### [backend/services/tokenService.js](../backend/services/tokenService.js)
-
-Crea los distintos tipos de credencial: JWT corto para acceso, refresh aleatorio para renovar y CSRF para autorizar peticiones que cambian datos. No son intercambiables.
-
-**Se conecta con:** [backend/config/env.js](../backend/config/env.js).
-
-**Funciones para buscar:**
-
-- [`createCsrfToken` · línea 13](../backend/services/tokenService.js#L13)
-- [`createRefreshToken` · línea 19](../backend/services/tokenService.js#L19): Devuelve dos representaciones del mismo secreto: rawToken para la cookie y tokenHash para SQL. No registrar rawToken en logs ni enviarlo en datos públicos del perfil.
-- [`hashToken` · línea 27](../backend/services/tokenService.js#L27)
-- [`refreshExpiryDate` · línea 30](../backend/services/tokenService.js#L30)
-- [`signAccessToken` · línea 41](../backend/services/tokenService.js#L41): Firma un JWT con ID, rol, sesión y CSRF; incluye vencimiento, emisor y audiencia. Firmar permite detectar modificaciones, no cifra los datos del token.
-- [`verifyAccessToken` · línea 63](../backend/services/tokenService.js#L63): Comprueba firma, vencimiento, emisor y audiencia del JWT. La vigencia de la sesión en SQL se comprueba además en el middleware.
-
-### [backend/tests/accountFlows.test.js](../backend/tests/accountFlows.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Se conecta con:** [backend/tests/testDatabase.js](../backend/tests/testDatabase.js).
-
-**Funciones para buscar:**
-
-- [`request` · línea 42](../backend/tests/accountFlows.test.js#L42)
-- [`login` · línea 69](../backend/tests/accountFlows.test.js#L69)
-- [`latestCode` · línea 74](../backend/tests/accountFlows.test.js#L74)
-
-### [backend/tests/auth.test.js](../backend/tests/auth.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Se conecta con:** [backend/tests/testDatabase.js](../backend/tests/testDatabase.js).
-
-**Funciones para buscar:**
-
-- [`request` · línea 44](../backend/tests/auth.test.js#L44)
-- [`login` · línea 77](../backend/tests/auth.test.js#L77)
-- [`register` · línea 82](../backend/tests/auth.test.js#L82)
-- [`change` · línea 374](../backend/tests/auth.test.js#L374)
-
-### [backend/tests/auth0.test.js](../backend/tests/auth0.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/tests/discord.test.js](../backend/tests/discord.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/tests/hosting.test.js](../backend/tests/hosting.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Funciones para buscar:**
-
-- [`hostingOrigins` · línea 5](../backend/tests/hosting.test.js#L5)
-
-### [backend/tests/microsoftDisabled.test.js](../backend/tests/microsoftDisabled.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/tests/mysql.test.js](../backend/tests/mysql.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Se conecta con:** [backend/tests/testDatabase.js](../backend/tests/testDatabase.js).
-
-**Funciones para buscar:**
-
-- [`action` · línea 103](../backend/tests/mysql.test.js#L103)
-
-### [backend/tests/oauth.test.js](../backend/tests/oauth.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/tests/oauthErrors.test.js](../backend/tests/oauthErrors.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Se conecta con:** [backend/utils/oauthErrors.js](../backend/utils/oauthErrors.js), [backend/tests/testDatabase.js](../backend/tests/testDatabase.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/tests/oauthTransport.test.js](../backend/tests/oauthTransport.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/tests/oidcProfile.test.js](../backend/tests/oidcProfile.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Se conecta con:** [backend/services/oauthService.js](../backend/services/oauthService.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/tests/production.test.js](../backend/tests/production.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Se conecta con:** [backend/scripts/mysqlPaths.js](../backend/scripts/mysqlPaths.js), [backend/tests/testDatabase.js](../backend/tests/testDatabase.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/tests/structure.test.js](../backend/tests/structure.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Se conecta con:** [backend/scripts/localPaths.js](../backend/scripts/localPaths.js).
-
-**Funciones para buscar:**
-
-- [`readPackage` · línea 8](../backend/tests/structure.test.js#L8)
-
-### [backend/tests/testDatabase.js](../backend/tests/testDatabase.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Se conecta con:** [backend/scripts/mysqlPaths.js](../backend/scripts/mysqlPaths.js), [backend/scripts/localMySQL.js](../backend/scripts/localMySQL.js), [backend/scripts/mysqlSchema.js](../backend/scripts/mysqlSchema.js).
-
-**Funciones para buscar:**
-
-- [`createTestDatabase` · línea 19](../backend/tests/testDatabase.js#L19)
-
-### [backend/utils/errors.js](../backend/utils/errors.js)
-
-Ayudas compartidas para transformar o validar datos. Usarlas desde varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito en la interfaz.
-
-**Funciones para buscar:**
-
-- [`asyncHandler` · línea 19](../backend/utils/errors.js#L19)
-
-### [backend/utils/normalizers.js](../backend/utils/normalizers.js)
-
-Ayudas compartidas para transformar o validar datos. Usarlas desde varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito en la interfaz.
-
-**Funciones para buscar:**
-
-- [`normalizeEmail` · línea 9](../backend/utils/normalizers.js#L9)
-- [`normalizeUsername` · línea 14](../backend/utils/normalizers.js#L14)
-- [`normalizeIdentifier` · línea 19](../backend/utils/normalizers.js#L19)
-- [`cleanDisplayName` · línea 24](../backend/utils/normalizers.js#L24)
-
-### [backend/utils/oauthErrors.js](../backend/utils/oauthErrors.js)
-
-Ayudas compartidas para transformar o validar datos. Usarlas desde varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito en la interfaz.
-
-**Funciones para buscar:**
-
-- [`classifyOAuthError` · línea 11](../backend/utils/oauthErrors.js#L11)
-
-### [backend/utils/passwordPolicy.js](../backend/utils/passwordPolicy.js)
-
-Ayudas compartidas para transformar o validar datos. Usarlas desde varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito en la interfaz.
-
-**Funciones para buscar:**
-
-- [`validatePasswordStrength` · línea 22](../backend/utils/passwordPolicy.js#L22)
-
-### [backend/validations/authValidation.js](../backend/validations/authValidation.js)
-
-Reglas autoritativas de entrada para la API. Se ejecutan antes del controlador y convierten campos inválidos en errores HTTP; no dependen de que el formulario del navegador sea honesto.
-
-**Se conecta con:** [backend/utils/passwordPolicy.js](../backend/utils/passwordPolicy.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/validations/codeValidation.js](../backend/validations/codeValidation.js)
-
-Reglas autoritativas de entrada para la API. Se ejecutan antes del controlador y convierten campos inválidos en errores HTTP; no dependen de que el formulario del navegador sea honesto.
-
-**Se conecta con:** [backend/utils/passwordPolicy.js](../backend/utils/passwordPolicy.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [backend/validations/userValidation.js](../backend/validations/userValidation.js)
-
-Reglas autoritativas de entrada para la API. Se ejecutan antes del controlador y convierten campos inválidos en errores HTTP; no dependen de que el formulario del navegador sea honesto.
-
-**Se conecta con:** [backend/utils/passwordPolicy.js](../backend/utils/passwordPolicy.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-## docs
-
-### [docs/auth0/discord-fetch-user-profile.js](../docs/auth0/discord-fetch-user-profile.js)
-
-Módulo auxiliar del proyecto. Las importaciones y símbolos siguientes permiten seguir su relación con el resto del código.
-
-**Funciones para buscar:**
-
-- [`fetchUserProfile` · línea 2](../docs/auth0/discord-fetch-user-profile.js#L2)
-
-### [docs/auth0/twitch-fetch-user-profile.js](../docs/auth0/twitch-fetch-user-profile.js)
-
-Módulo auxiliar del proyecto. Las importaciones y símbolos siguientes permiten seguir su relación con el resto del código.
-
-**Funciones para buscar:**
-
-- [`fetchUserProfile` · línea 2](../docs/auth0/twitch-fetch-user-profile.js#L2)
+| Archivo | Responsabilidad | Funciones y líneas |
+| --- | --- | --- |
+| [backend/app.js](../backend/app.js) | Configura Express, Helmet, CORS, JSON, rutas API y manejo centralizado de errores. Resuelve seguridad HTTP, CORS, modularidad de rutas y fallback SPA en produccion. | Declaraciones o configuración. |
+| [backend/config/cookies.js](../backend/config/cookies.js) | Centraliza nombres y opciones de cookies httpOnly. Resuelve JWT seguro, SameSite, Secure y expiracion. | Declaraciones o configuración. |
+| [backend/config/db.js](../backend/config/db.js) | Pool MySQL con consultas preparadas y transacciones reales. | [mysqlConnectionOptions · 17](../backend/config/db.js#L17), [wrapMySQLConnection · 51](../backend/config/db.js#L51), [query · 95](../backend/config/db.js#L95), [withTransaction · 103](../backend/config/db.js#L103) |
+| [backend/config/env.js](../backend/config/env.js) | Lee y valida variables de entorno. Resuelve no hardcodear secretos, puertos, CORS, JWT y bcrypt configurables. | [toInteger · 21](../backend/config/env.js#L21), [toBoolean · 32](../backend/config/env.js#L32), [required · 42](../backend/config/env.js#L42), [optional · 55](../backend/config/env.js#L55) |
+| [backend/config/oauthProviders.js](../backend/config/oauthProviders.js) | Declara los proveedores sociales y permite centralizarlos en Auth0 sin duplicar el flujo OAuth. | [redirectUri · 16](../backend/config/oauthProviders.js#L16), [configured · 23](../backend/config/oauthProviders.js#L23), [provider · 31](../backend/config/oauthProviders.js#L31), [auth0SubjectId · 51](../backend/config/oauthProviders.js#L51), [auth0Provider · 63](../backend/config/oauthProviders.js#L63), [getOAuthProvider · 279](../backend/config/oauthProviders.js#L279), [listPublicOAuthProviders · 287](../backend/config/oauthProviders.js#L287) |
+| [backend/controllers/adminController.js](../backend/controllers/adminController.js) | Implementa gestion admin de usuarios. Resuelve rol admin, listado sin hashes y auditoria de acciones. | [toPageNumber · 19](../backend/controllers/adminController.js#L19), [getUsers · 29](../backend/controllers/adminController.js#L29), [updateUserAsAdmin · 51](../backend/controllers/adminController.js#L51), [getAuditLogs · 101](../backend/controllers/adminController.js#L101) |
+| [backend/controllers/authController.js](../backend/controllers/authController.js) | Registro e ingreso de R5 con correo Mailtrap y sesiones compartidas con OAuth. | [setAuthCookies · 59](../backend/controllers/authController.js#L59), [clearAuthCookies · 69](../backend/controllers/authController.js#L69), [issueNewSession · 80](../backend/controllers/authController.js#L80), [register · 106](../backend/controllers/authController.js#L106), [login · 179](../backend/controllers/authController.js#L179), [refresh · 278](../backend/controllers/authController.js#L278), [me · 315](../backend/controllers/authController.js#L315), [logout · 322](../backend/controllers/authController.js#L322), [checkAvailability · 340](../backend/controllers/authController.js#L340) |
+| [backend/controllers/codeController.js](../backend/controllers/codeController.js) | Verifica email, desbloquea cuentas y recupera contrasenas con Mailtrap. | [requestCode · 35](../backend/controllers/codeController.js#L35), [confirmCode · 72](../backend/controllers/codeController.js#L72), [resetPassword · 123](../backend/controllers/codeController.js#L123) |
+| [backend/controllers/emailController.js](../backend/controllers/emailController.js) | Cambia el email solamente despues de validar clave local y codigo Mailtrap. | [requestEmailChange · 31](../backend/controllers/emailController.js#L31), [confirmEmailChange · 72](../backend/controllers/emailController.js#L72) |
+| [backend/controllers/oauthController.js](../backend/controllers/oauthController.js) | Inicia y completa login social generico, vincula/crea usuarios y emite la sesion local existente. | [safeEqual · 50](../backend/controllers/oauthController.js#L50), [clientUrl · 63](../backend/controllers/oauthController.js#L63), [redirectError · 70](../backend/controllers/oauthController.js#L70), [listProviders · 92](../backend/controllers/oauthController.js#L92), [startOAuth · 100](../backend/controllers/oauthController.js#L100), [resolveOAuthUser · 128](../backend/controllers/oauthController.js#L128), [oauthCallback · 222](../backend/controllers/oauthController.js#L222) |
+| [backend/controllers/userController.js](../backend/controllers/userController.js) | Implementa perfil propio y cambio de contrasena. Resuelve privacidad por usuario, validacion de contrasena actual y revocacion de sesiones. | [getProfile · 28](../backend/controllers/userController.js#L28), [getOAuthAccounts · 36](../backend/controllers/userController.js#L36), [updateProfile · 46](../backend/controllers/userController.js#L46), [changePassword · 102](../backend/controllers/userController.js#L102) |
+| [backend/db/least-privilege.sql](../backend/db/least-privilege.sql) | Esquema, migración o permisos de MySQL. | Declaraciones o configuración. |
+| [backend/db/schema.sql](../backend/db/schema.sql) | Esquema, migración o permisos de MySQL. | Declaraciones o configuración. |
+| [backend/eslint.config.js](../backend/eslint.config.js) | Configuración o composición del módulo. | Declaraciones o configuración. |
+| [backend/middlewares/authMiddleware.js](../backend/middlewares/authMiddleware.js) | Protege rutas con JWT, sesion activa, CSRF y rol admin. Resuelve control real del backend, no del front. | [requireAuth · 21](../backend/middlewares/authMiddleware.js#L21), [requireCsrfToken · 68](../backend/middlewares/authMiddleware.js#L68), [requireRole · 90](../backend/middlewares/authMiddleware.js#L90) |
+| [backend/middlewares/errorHandler.js](../backend/middlewares/errorHandler.js) | Centraliza errores sin exponer stack traces. Resuelve manejo seguro de errores. | [notFoundHandler · 14](../backend/middlewares/errorHandler.js#L14), [errorHandler · 24](../backend/middlewares/errorHandler.js#L24) |
+| [backend/middlewares/rateLimiters.js](../backend/middlewares/rateLimiters.js) | Define limites de intentos para auth. Resuelve defensa contra fuerza bruta y spam. | [jsonRateLimitHandler · 14](../backend/middlewares/rateLimiters.js#L14) |
+| [backend/middlewares/validateRequest.js](../backend/middlewares/validateRequest.js) | Convierte errores de express-validator en respuestas por campo. Resuelve validacion backend clara. | [validateRequest · 13](../backend/middlewares/validateRequest.js#L13) |
+| [backend/models/auditLogModel.js](../backend/models/auditLogModel.js) | Inserta logs de auditoria sin datos sensibles. Resuelve trazabilidad de login, perfil y admin. | [writeAuditLog · 17](../backend/models/auditLogModel.js#L17), [listAuditLogs · 41](../backend/models/auditLogModel.js#L41) |
+| [backend/models/oauthAccountModel.js](../backend/models/oauthAccountModel.js) | Consulta y crea vinculos normalizados entre usuarios locales y proveedores OAuth. | [findOAuthAccount · 14](../backend/models/oauthAccountModel.js#L14), [createOAuthAccount · 36](../backend/models/oauthAccountModel.js#L36), [listOAuthAccountsByUserId · 52](../backend/models/oauthAccountModel.js#L52) |
+| [backend/models/oauthStateModel.js](../backend/models/oauthStateModel.js) | Persiste y consume una sola vez los estados OAuth y verificadores PKCE de corta duracion. | [createOAuthState · 16](../backend/models/oauthStateModel.js#L16), [consumeOAuthState · 36](../backend/models/oauthStateModel.js#L36), [consume · 41](../backend/models/oauthStateModel.js#L41) |
+| [backend/models/sessionModel.js](../backend/models/sessionModel.js) | Contiene consultas parametrizadas de sesiones. Resuelve refresh tokens hasheados, rotacion y revocacion. | [createSession · 17](../backend/models/sessionModel.js#L17), [findValidSessionByRefreshHash · 43](../backend/models/sessionModel.js#L43), [findActiveSessionById · 67](../backend/models/sessionModel.js#L67), [rotateSession · 85](../backend/models/sessionModel.js#L85), [revokeSession · 108](../backend/models/sessionModel.js#L108), [revokeUserSessionsExcept · 123](../backend/models/sessionModel.js#L123), [revokeAllUserSessions · 142](../backend/models/sessionModel.js#L142) |
+| [backend/models/userModel.js](../backend/models/userModel.js) | Contiene consultas parametrizadas de usuarios. Resuelve usuarios, roles, duplicados case-insensitive y respuestas sin password_hash. | [findUserByIdentifierForAuth · 58](../backend/models/userModel.js#L58), [findPublicUserById · 78](../backend/models/userModel.js#L78), [findPublicUserByEmail · 91](../backend/models/userModel.js#L91), [findUniqueUsername · 105](../backend/models/userModel.js#L105), [findUserByIdForPassword · 125](../backend/models/userModel.js#L125), [findDuplicates · 145](../backend/models/userModel.js#L145), [createUser · 184](../backend/models/userModel.js#L184), [updateUserProfile · 215](../backend/models/userModel.js#L215), [updatePasswordHash · 237](../backend/models/userModel.js#L237), [listUsers · 255](../backend/models/userModel.js#L255), [updateUserAdminFields · 283](../backend/models/userModel.js#L283) |
+| [backend/package.json](../backend/package.json) | Configuración o composición del módulo. | Declaraciones o configuración. |
+| [backend/routes/adminRoutes.js](../backend/routes/adminRoutes.js) | Define endpoints protegidos de administracion con verificacion de rol admin. | Declaraciones o configuración. |
+| [backend/routes/authRoutes.js](../backend/routes/authRoutes.js) | Define endpoints de autenticacion y conecta validaciones/rate limiters/controladores. | [anonymous · 104](../backend/routes/authRoutes.js#L104) |
+| [backend/routes/oauthRoutes.js](../backend/routes/oauthRoutes.js) | Publica las rutas genericas de inicio, callback y proveedores OAuth. | Declaraciones o configuración. |
+| [backend/routes/userRoutes.js](../backend/routes/userRoutes.js) | Define endpoints protegidos del perfil propio y cambio de contrasena. | Declaraciones o configuración. |
+| [backend/scripts/checkMail.js](../backend/scripts/checkMail.js) | Comprueba Mailtrap sin imprimir usuario, clave ni mensajes privados. | Declaraciones o configuración. |
+| [backend/scripts/checkOAuth.js](../backend/scripts/checkOAuth.js) | Diagnóstico sin secretos: presencia de credenciales y descubrimiento OIDC. No certifica permisos remotos ni un ingreso interactivo real. | Declaraciones o configuración. |
+| [backend/scripts/createAdmin.js](../backend/scripts/createAdmin.js) | Crea el primer administrador desde variables de entorno. Resuelve alta inicial admin sin endpoint publico. | [requiredAdminEnv · 16](../backend/scripts/createAdmin.js#L16), [main · 24](../backend/scripts/createAdmin.js#L24) |
+| [backend/scripts/doctor.js](../backend/scripts/doctor.js) | Diagnóstico de MySQL sin imprimir credenciales ni datos de cuentas. | Declaraciones o configuración. |
+| [backend/scripts/importPreviousAccounts.js](../backend/scripts/importPreviousAccounts.js) | Importación local única: conserva UUID, hashes y vínculos; no migra sesiones ni códigos. | [importPreviousAccounts · 6](../backend/scripts/importPreviousAccounts.js#L6) |
+| [backend/scripts/localMySQL.js](../backend/scripts/localMySQL.js) | Inicia MySQL Community oficial solo en localhost y no modifica servicios externos. | [readMySQLCredentials · 16](../backend/scripts/localMySQL.js#L16), [localMySQLOptions · 19](../backend/scripts/localMySQL.js#L19), [startLocalMySQL · 30](../backend/scripts/localMySQL.js#L30), [ping · 35](../backend/scripts/localMySQL.js#L35), [stopLocalMySQL · 96](../backend/scripts/localMySQL.js#L96) |
+| [backend/scripts/localPaths.js](../backend/scripts/localPaths.js) | Rutas del proyecto independientes de la terminal actual. | Declaraciones o configuración. |
+| [backend/scripts/migrateMySQL.js](../backend/scripts/migrateMySQL.js) | Crea el esquema en una base MySQL ya asignada, sin usar root en la API. | Declaraciones o configuración. |
+| [backend/scripts/mysqlPaths.js](../backend/scripts/mysqlPaths.js) | Rutas del servidor MySQL local, aislado de XAMPP y de otros proyectos. | Declaraciones o configuración. |
+| [backend/scripts/mysqlSchema.js](../backend/scripts/mysqlSchema.js) | Aplica SQL propio y permisos mínimos sin depender del nombre de la base alojada. | [applyMySQLSchema · 6](../backend/scripts/mysqlSchema.js#L6), [grantApplicationPrivileges · 19](../backend/scripts/mysqlSchema.js#L19) |
+| [backend/scripts/prepareDev.js](../backend/scripts/prepareDev.js) | Valida MySQL antes de iniciar los dos paquetes. | Declaraciones o configuración. |
+| [backend/scripts/setupLocal.js](../backend/scripts/setupLocal.js) | Prepara MySQL local sin modificar XAMPP, PostgreSQL anterior ni claves sociales. | [secret · 21](../backend/scripts/setupLocal.js#L21), [main · 23](../backend/scripts/setupLocal.js#L23) |
+| [backend/scripts/stopLocal.js](../backend/scripts/stopLocal.js) | Herramienta de preparación o diagnóstico; revisar entradas y efectos antes de ejecutarla. | Declaraciones o configuración. |
+| [backend/server.js](../backend/server.js) | Arranca el servidor HTTP y cierra el pool SQL en apagado ordenado. Resuelve ejecucion backend y limpieza de recursos. | [shutdown · 44](../backend/server.js#L44) |
+| [backend/services/challengeService.js](../backend/services/challengeService.js) | Emite y consume codigos de un solo uso para verificar email y recuperar acceso. | [digest · 26](../backend/services/challengeService.js#L26), [issueChallenge · 36](../backend/services/challengeService.js#L36), [consumeChallenge · 116](../backend/services/challengeService.js#L116), [invalid · 128](../backend/services/challengeService.js#L128), [invalidateChallenges · 199](../backend/services/challengeService.js#L199) |
+| [backend/services/databaseHealth.js](../backend/services/databaseHealth.js) | Comprobación de infraestructura de R5. Consulta columnas de sus ocho tablas y traduce fallos de conexión, esquema o permisos a diagnósticos de arranque. | [checkDatabase · 14](../backend/services/databaseHealth.js#L14), [databaseHelp · 31](../backend/services/databaseHealth.js#L31) |
+| [backend/services/mailService.js](../backend/services/mailService.js) | Envía los códigos de R5 por SMTP de Mailtrap con configuración privada del servidor. | [ensureMailConfigured · 23](../backend/services/mailService.js#L23), [getTransport · 35](../backend/services/mailService.js#L35), [sendCode · 59](../backend/services/mailService.js#L59), [verifyMailConnection · 95](../backend/services/mailService.js#L95) |
+| [backend/services/oauthService.js](../backend/services/oauthService.js) | Ejecuta Authorization Code, PKCE, validacion OIDC y normaliza perfiles externos sin guardar tokens. | [base64Url · 23](../backend/services/oauthService.js#L23), [createPkcePair · 30](../backend/services/oauthService.js#L30), [createOAuthTransaction · 44](../backend/services/oauthService.js#L44), [oauthStateCookieName · 64](../backend/services/oauthService.js#L64), [oauthStateCookieOptions · 72](../backend/services/oauthService.js#L72), [buildAuthorizationUrl · 84](../backend/services/oauthService.js#L84), [oauthRequestFailure · 111](../backend/services/oauthService.js#L111), [fetchJson · 128](../backend/services/oauthService.js#L128), [exchangeCodeForTokens · 226](../backend/services/oauthService.js#L226), [verifyOidcToken · 265](../backend/services/oauthService.js#L265), [fetchNormalizedProfile · 288](../backend/services/oauthService.js#L288), [validateNormalizedProfile · 327](../backend/services/oauthService.js#L327), [safeUsernameBase · 359](../backend/services/oauthService.js#L359), [decideOAuthAccountAction · 375](../backend/services/oauthService.js#L375) |
+| [backend/services/tokenService.js](../backend/services/tokenService.js) | Genera y verifica JWT, CSRF y refresh tokens. Resuelve autenticacion segura y rotacion. | [createCsrfToken · 17](../backend/services/tokenService.js#L17), [createRefreshToken · 23](../backend/services/tokenService.js#L23), [hashToken · 36](../backend/services/tokenService.js#L36), [refreshExpiryDate · 43](../backend/services/tokenService.js#L43), [signAccessToken · 54](../backend/services/tokenService.js#L54), [verifyAccessToken · 76](../backend/services/tokenService.js#L76) |
+| [backend/tests/accountFlows.test.js](../backend/tests/accountFlows.test.js) | Recorridos de correo y recuperación contra MySQL temporal y transporte de prueba. No modifica cuentas diarias ni envía mensajes a Mailtrap real. | [request · 42](../backend/tests/accountFlows.test.js#L42), [login · 69](../backend/tests/accountFlows.test.js#L69), [latestCode · 74](../backend/tests/accountFlows.test.js#L74) |
+| [backend/tests/auth.test.js](../backend/tests/auth.test.js) | Pruebas o ayuda de pruebas; leer sus casos y aserciones. | [request · 44](../backend/tests/auth.test.js#L44), [login · 77](../backend/tests/auth.test.js#L77), [register · 82](../backend/tests/auth.test.js#L82), [change · 374](../backend/tests/auth.test.js#L374) |
+| [backend/tests/auth0.test.js](../backend/tests/auth0.test.js) | Pruebas de configuracion del broker Auth0 sin realizar llamadas a Internet. | Declaraciones o configuración. |
+| [backend/tests/discord.test.js](../backend/tests/discord.test.js) | Verifica Discord directo junto a Google/GitHub en Auth0 sin cuentas ni red externa. | Declaraciones o configuración. |
+| [backend/tests/hosting.test.js](../backend/tests/hosting.test.js) | Pruebas o ayuda de pruebas; leer sus casos y aserciones. | [hostingOrigins · 5](../backend/tests/hosting.test.js#L5) |
+| [backend/tests/microsoftDisabled.test.js](../backend/tests/microsoftDisabled.test.js) | Microsoft no tiene un fallback ficticio: sin Auth0 debe quedar desactivado. | Declaraciones o configuración. |
+| [backend/tests/mysql.test.js](../backend/tests/mysql.test.js) | Regresiones de la migración: MySQL real, estados de un uso y bloqueos concurrentes. | [action · 103](../backend/tests/mysql.test.js#L103) |
+| [backend/tests/oauth.test.js](../backend/tests/oauth.test.js) | Prueba state, PKCE, URL y normalizacion OAuth sin depender de redes externas. | Declaraciones o configuración. |
+| [backend/tests/oauthErrors.test.js](../backend/tests/oauthErrors.test.js) | Verifica errores sociales sin contactar proveedores. Los callbacks se ejercen con estados auténticos de una base temporal y nunca crean sesiones externas. | Declaraciones o configuración. |
+| [backend/tests/oauthTransport.test.js](../backend/tests/oauthTransport.test.js) | Pruebas o ayuda de pruebas; leer sus casos y aserciones. | Declaraciones o configuración. |
+| [backend/tests/oidcProfile.test.js](../backend/tests/oidcProfile.test.js) | Verifica firmas y la coincidencia del subject OIDC antes del mapeo local. El emisor y las claves de prueba son locales; no se contacta Auth0 real. | Declaraciones o configuración. |
+| [backend/tests/production.test.js](../backend/tests/production.test.js) | Prueba la distribución pública con MySQL y el mismo servidor Express de producción. | Declaraciones o configuración. |
+| [backend/tests/structure.test.js](../backend/tests/structure.test.js) | Contrato de separación: impide volver a mezclar código, paquetes o secretos. | [readPackage · 8](../backend/tests/structure.test.js#L8) |
+| [backend/tests/testDatabase.js](../backend/tests/testDatabase.js) | Cada suite usa su propia base y cuenta MySQL, nunca los datos del trabajo. | [createTestDatabase · 19](../backend/tests/testDatabase.js#L19) |
+| [backend/utils/errors.js](../backend/utils/errors.js) | Define AppError y asyncHandler. Resuelve errores operacionales y control asincronico. | [AppError · 5](../backend/utils/errors.js#L5), [asyncHandler · 19](../backend/utils/errors.js#L19) |
+| [backend/utils/normalizers.js](../backend/utils/normalizers.js) | Normaliza email, username, identificador y displayName. Resuelve trim/lowercase anti-duplicados. | [normalizeEmail · 9](../backend/utils/normalizers.js#L9), [normalizeUsername · 18](../backend/utils/normalizers.js#L18), [normalizeIdentifier · 27](../backend/utils/normalizers.js#L27), [cleanDisplayName · 36](../backend/utils/normalizers.js#L36) |
+| [backend/utils/oauthErrors.js](../backend/utils/oauthErrors.js) | Clasificación de errores sociales de R5. Convierte motivos externos en códigos públicos permitidos sin reflejar descripciones privadas del proveedor. | [classifyOAuthError · 9](../backend/utils/oauthErrors.js#L9) |
+| [backend/utils/passwordPolicy.js](../backend/utils/passwordPolicy.js) | Define politica de contrasenas. Resuelve longitud, mayuscula, minuscula, numero y simbolo. | [validatePasswordStrength · 24](../backend/utils/passwordPolicy.js#L24) |
+| [backend/validations/authValidation.js](../backend/validations/authValidation.js) | Valida registro, login y disponibilidad en backend. Resuelve no confiar solo en el frontend. | Declaraciones o configuración. |
+| [backend/validations/codeValidation.js](../backend/validations/codeValidation.js) | Valida solicitudes y confirmaciones de codigos antes del controlador. | Declaraciones o configuración. |
+| [backend/validations/userValidation.js](../backend/validations/userValidation.js) | Valida perfil, cambio de contrasena y acciones admin en backend. | Declaraciones o configuración. |
 
 ## frontend
 
-### [frontend/eslint.config.js](../frontend/eslint.config.js)
-
-Configuración del análisis estático de código. Define reglas y archivos revisados; no decide permisos de usuarios ni persistencia.
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [frontend/src/App.jsx](../frontend/src/App.jsx)
-
-Mapa de páginas de Umbral. Reúne rutas públicas y protegidas, sin implementar consultas SQL ni autenticación de proveedores dentro del componente.
-
-**Se conecta con:** [frontend/src/components/AppShell.jsx](../frontend/src/components/AppShell.jsx), [frontend/src/components/ProtectedRoute.jsx](../frontend/src/components/ProtectedRoute.jsx), [frontend/src/pages/HomePage.jsx](../frontend/src/pages/HomePage.jsx), [frontend/src/pages/LoginPage.jsx](../frontend/src/pages/LoginPage.jsx), [frontend/src/pages/RegisterPage.jsx](../frontend/src/pages/RegisterPage.jsx), [frontend/src/pages/CodePage.jsx](../frontend/src/pages/CodePage.jsx).
-
-**Funciones para buscar:**
-
-- [`App` · línea 29](../frontend/src/App.jsx#L29)
-
-### [frontend/src/components/admin/AuditActivity.jsx](../frontend/src/components/admin/AuditActivity.jsx)
-
-Componente reutilizable AuditActivity. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Se conecta con:** [frontend/src/services/adminService.js](../frontend/src/services/adminService.js), [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx), [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx).
-
-**Funciones para buscar:**
-
-- [`AuditActivity` · línea 26](../frontend/src/components/admin/AuditActivity.jsx#L26)
-
-### [frontend/src/components/admin/UserManagement.jsx](../frontend/src/components/admin/UserManagement.jsx)
-
-Componente reutilizable UserManagement. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Se conecta con:** [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx), [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx), [frontend/src/services/adminService.js](../frontend/src/services/adminService.js).
-
-**Funciones para buscar:**
-
-- [`UserManagement` · línea 14](../frontend/src/components/admin/UserManagement.jsx#L14)
-- [`updateDraft` · línea 63](../frontend/src/components/admin/UserManagement.jsx#L63)
-- [`saveUser` · línea 74](../frontend/src/components/admin/UserManagement.jsx#L74)
-
-### [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx)
-
-Componente reutilizable Alert. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Funciones para buscar:**
-
-- [`Alert` · línea 16](../frontend/src/components/Alert.jsx#L16)
-
-### [frontend/src/components/AppShell.jsx](../frontend/src/components/AppShell.jsx)
-
-Componente reutilizable AppShell. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Se conecta con:** [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js), [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx), [frontend/src/components/ThemeToggle.jsx](../frontend/src/components/ThemeToggle.jsx), [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx).
-
-**Funciones para buscar:**
-
-- [`AppShell` · línea 23](../frontend/src/components/AppShell.jsx#L23)
-
-### [frontend/src/components/AuthLayout.jsx](../frontend/src/components/AuthLayout.jsx)
-
-Componente reutilizable AuthLayout. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Funciones para buscar:**
-
-- [`AuthLayout` · línea 62](../frontend/src/components/AuthLayout.jsx#L62)
-
-### [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx)
-
-Componente reutilizable Button. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Funciones para buscar:**
-
-- [`Button` · línea 10](../frontend/src/components/Button.jsx#L10)
-
-### [frontend/src/components/FormStatus.jsx](../frontend/src/components/FormStatus.jsx)
-
-Componente reutilizable FormStatus. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Se conecta con:** [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx).
-
-**Funciones para buscar:**
-
-- [`FormStatus` · línea 10](../frontend/src/components/FormStatus.jsx#L10)
-
-### [frontend/src/components/PasswordStrength.jsx](../frontend/src/components/PasswordStrength.jsx)
-
-Componente reutilizable PasswordStrength. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Se conecta con:** [frontend/src/utils/validators.js](../frontend/src/utils/validators.js).
-
-**Funciones para buscar:**
-
-- [`PasswordStrength` · línea 11](../frontend/src/components/PasswordStrength.jsx#L11)
-
-### [frontend/src/components/profile/EmailChangeForm.jsx](../frontend/src/components/profile/EmailChangeForm.jsx)
-
-Componente reutilizable EmailChangeForm. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Se conecta con:** [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js), [frontend/src/hooks/useForm.js](../frontend/src/hooks/useForm.js), [frontend/src/services/codeService.js](../frontend/src/services/codeService.js), [frontend/src/utils/validators.js](../frontend/src/utils/validators.js), [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx), [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx), [frontend/src/components/FormStatus.jsx](../frontend/src/components/FormStatus.jsx), [frontend/src/components/TextField.jsx](../frontend/src/components/TextField.jsx).
-
-**Funciones para buscar:**
-
-- [`EmailChangeForm` · línea 22](../frontend/src/components/profile/EmailChangeForm.jsx#L22)
-
-### [frontend/src/components/profile/PasswordChangeForm.jsx](../frontend/src/components/profile/PasswordChangeForm.jsx)
-
-Componente reutilizable PasswordChangeForm. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Se conecta con:** [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js), [frontend/src/hooks/useForm.js](../frontend/src/hooks/useForm.js), [frontend/src/services/userService.js](../frontend/src/services/userService.js), [frontend/src/utils/validators.js](../frontend/src/utils/validators.js), [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx), [frontend/src/components/FormStatus.jsx](../frontend/src/components/FormStatus.jsx), [frontend/src/components/PasswordStrength.jsx](../frontend/src/components/PasswordStrength.jsx), [frontend/src/components/TextField.jsx](../frontend/src/components/TextField.jsx).
-
-**Funciones para buscar:**
-
-- [`PasswordChangeForm` · línea 21](../frontend/src/components/profile/PasswordChangeForm.jsx#L21)
-
-### [frontend/src/components/profile/ProfileDetailsForm.jsx](../frontend/src/components/profile/ProfileDetailsForm.jsx)
-
-Componente reutilizable ProfileDetailsForm. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Se conecta con:** [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js), [frontend/src/hooks/useForm.js](../frontend/src/hooks/useForm.js), [frontend/src/services/userService.js](../frontend/src/services/userService.js), [frontend/src/utils/validators.js](../frontend/src/utils/validators.js), [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx), [frontend/src/components/FormStatus.jsx](../frontend/src/components/FormStatus.jsx), [frontend/src/components/TextField.jsx](../frontend/src/components/TextField.jsx).
-
-**Funciones para buscar:**
-
-- [`ProfileDetailsForm` · línea 20](../frontend/src/components/profile/ProfileDetailsForm.jsx#L20)
-
-### [frontend/src/components/ProtectedRoute.jsx](../frontend/src/components/ProtectedRoute.jsx)
-
-Guarda visual de navegación mientras se comprueba sesión/rol. No protege la base por sí sola: el backend vuelve a exigir autorización.
-
-**Se conecta con:** [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js).
-
-**Funciones para buscar:**
-
-- [`ProtectedRoute` · línea 12](../frontend/src/components/ProtectedRoute.jsx#L12)
-
-### [frontend/src/components/SocialLoginButtons.jsx](../frontend/src/components/SocialLoginButtons.jsx)
-
-Botones de redirección, no formularios de contraseña de la red social. Consulta disponibilidad, evita dobles activaciones y delega la autenticación al proveedor externo.
-
-**Se conecta con:** [frontend/src/services/authService.js](../frontend/src/services/authService.js), [frontend/src/utils/socialLogin.js](../frontend/src/utils/socialLogin.js).
-
-**Funciones para buscar:**
-
-- [`SocialLoginButtons` · línea 22](../frontend/src/components/SocialLoginButtons.jsx#L22)
-- [`resetNavigation` · línea 29](../frontend/src/components/SocialLoginButtons.jsx#L29)
-- [`begin` · línea 56](../frontend/src/components/SocialLoginButtons.jsx#L56)
-
-### [frontend/src/components/TextField.jsx](../frontend/src/components/TextField.jsx)
-
-Componente reutilizable TextField. Sus props conectan contenido y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y los callbacks recibidos en lugar de suponer que guarda directamente en una base.
-
-**Funciones para buscar:**
-
-- [`TextField` · línea 18](../frontend/src/components/TextField.jsx#L18)
-
-### [frontend/src/components/ThemeToggle.jsx](../frontend/src/components/ThemeToggle.jsx)
-
-Parte del sistema visual: comparte colores, tamaños o preferencia de tema según su implementación. La preferencia de apariencia es independiente de la autenticación y de los datos de las tareas.
-
-**Se conecta con:** [frontend/src/hooks/useTheme.js](../frontend/src/hooks/useTheme.js).
-
-**Funciones para buscar:**
-
-- [`ThemeToggle` · línea 11](../frontend/src/components/ThemeToggle.jsx#L11)
-
-### [frontend/src/context/AuthContext.jsx](../frontend/src/context/AuthContext.jsx)
-
-Comparte solo el perfil público y el estado de sesión entre páginas. Las credenciales reales viven en cookies HttpOnly y el CSRF en memoria; al iniciar consulta /me.
-
-**Se conecta con:** [frontend/src/services/apiClient.js](../frontend/src/services/apiClient.js), [frontend/src/services/authService.js](../frontend/src/services/authService.js).
-
-**Funciones para buscar:**
-
-- [`AuthProvider` · línea 27](../frontend/src/context/AuthContext.jsx#L27)
-
-### [frontend/src/context/ThemeContext.jsx](../frontend/src/context/ThemeContext.jsx)
-
-Parte del sistema visual: comparte colores, tamaños o preferencia de tema según su implementación. La preferencia de apariencia es independiente de la autenticación y de los datos de las tareas.
-
-**Funciones para buscar:**
-
-- [`getInitialTheme` · línea 12](../frontend/src/context/ThemeContext.jsx#L12)
-- [`ThemeProvider` · línea 22](../frontend/src/context/ThemeContext.jsx#L22)
-
-### [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js)
-
-Hook reutilizable que agrupa estado o comportamiento de React. El nombre use permite reconocer que se consume desde componentes u otros hooks, no como un endpoint del servidor.
-
-**Se conecta con:** [frontend/src/context/AuthContext.jsx](../frontend/src/context/AuthContext.jsx).
-
-**Funciones para buscar:**
-
-- [`useAuth` · línea 11](../frontend/src/hooks/useAuth.js#L11)
-
-### [frontend/src/hooks/useCooldown.js](../frontend/src/hooks/useCooldown.js)
-
-Hook reutilizable que agrupa estado o comportamiento de React. El nombre use permite reconocer que se consume desde componentes u otros hooks, no como un endpoint del servidor.
-
-**Funciones para buscar:**
-
-- [`useCooldown` · línea 10](../frontend/src/hooks/useCooldown.js#L10)
-
-### [frontend/src/hooks/useForm.js](../frontend/src/hooks/useForm.js)
-
-Agrupa valores, validación, estado pendiente y errores por campo. Recibir una respuesta correcta del servidor es lo que permite mostrar éxito, no simplemente pulsar Enviar.
-
-**Se conecta con:** [frontend/src/utils/validators.js](../frontend/src/utils/validators.js).
-
-**Funciones para buscar:**
-
-- [`useForm` · línea 11](../frontend/src/hooks/useForm.js#L11)
-- [`field` · línea 19](../frontend/src/hooks/useForm.js#L19)
-- [`run` · línea 30](../frontend/src/hooks/useForm.js#L30)
-- [`submit` · línea 49](../frontend/src/hooks/useForm.js#L49)
-- [`reset` · línea 58](../frontend/src/hooks/useForm.js#L58)
-
-### [frontend/src/hooks/useTheme.js](../frontend/src/hooks/useTheme.js)
-
-Parte del sistema visual: comparte colores, tamaños o preferencia de tema según su implementación. La preferencia de apariencia es independiente de la autenticación y de los datos de las tareas.
-
-**Se conecta con:** [frontend/src/context/ThemeContext.jsx](../frontend/src/context/ThemeContext.jsx).
-
-**Funciones para buscar:**
-
-- [`useTheme` · línea 11](../frontend/src/hooks/useTheme.js#L11)
-
-### [frontend/src/main.jsx](../frontend/src/main.jsx)
-
-Punto de entrada del navegador: monta React sobre el elemento raíz del HTML e instala los proveedores/navegación declarados. No es un servidor Node.js ni una conexión a la base.
-
-**Se conecta con:** [frontend/src/App.jsx](../frontend/src/App.jsx), [frontend/src/context/AuthContext.jsx](../frontend/src/context/AuthContext.jsx), [frontend/src/context/ThemeContext.jsx](../frontend/src/context/ThemeContext.jsx), [frontend/src/styles/global.css](../frontend/src/styles/global.css).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [frontend/src/pages/AdminPage.jsx](../frontend/src/pages/AdminPage.jsx)
-
-Pantalla AdminPage. Coordina presentación y eventos; seguir los servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los datos.
-
-**Se conecta con:** [frontend/src/components/admin/UserManagement.jsx](../frontend/src/components/admin/UserManagement.jsx), [frontend/src/components/admin/AuditActivity.jsx](../frontend/src/components/admin/AuditActivity.jsx).
-
-**Funciones para buscar:**
-
-- [`AdminPage` · línea 13](../frontend/src/pages/AdminPage.jsx#L13)
-
-### [frontend/src/pages/CodePage.jsx](../frontend/src/pages/CodePage.jsx)
-
-Pantalla compartida de códigos. El propósito distingue verificar, desbloquear o restablecer; un mismo número no autoriza operaciones distintas sin el desafío correspondiente.
-
-**Se conecta con:** [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx), [frontend/src/components/AuthLayout.jsx](../frontend/src/components/AuthLayout.jsx), [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx), [frontend/src/components/FormStatus.jsx](../frontend/src/components/FormStatus.jsx), [frontend/src/components/PasswordStrength.jsx](../frontend/src/components/PasswordStrength.jsx), [frontend/src/components/TextField.jsx](../frontend/src/components/TextField.jsx), [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js), [frontend/src/hooks/useCooldown.js](../frontend/src/hooks/useCooldown.js), [frontend/src/hooks/useForm.js](../frontend/src/hooks/useForm.js), [frontend/src/services/codeService.js](../frontend/src/services/codeService.js), [frontend/src/utils/validators.js](../frontend/src/utils/validators.js).
-
-**Funciones para buscar:**
-
-- [`CodePage` · línea 36](../frontend/src/pages/CodePage.jsx#L36)
-- [`sendCode` · línea 94](../frontend/src/pages/CodePage.jsx#L94)
-
-### [frontend/src/pages/HomePage.jsx](../frontend/src/pages/HomePage.jsx)
-
-Pantalla HomePage. Coordina presentación y eventos; seguir los servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los datos.
-
-**Se conecta con:** [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js).
-
-**Funciones para buscar:**
-
-- [`HomePage` · línea 11](../frontend/src/pages/HomePage.jsx#L11)
-
-### [frontend/src/pages/LoginPage.jsx](../frontend/src/pages/LoginPage.jsx)
-
-Pantalla LoginPage. Coordina presentación y eventos; seguir los servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los datos.
-
-**Se conecta con:** [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx), [frontend/src/components/AuthLayout.jsx](../frontend/src/components/AuthLayout.jsx), [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx), [frontend/src/components/TextField.jsx](../frontend/src/components/TextField.jsx), [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js), [frontend/src/components/SocialLoginButtons.jsx](../frontend/src/components/SocialLoginButtons.jsx).
-
-**Funciones para buscar:**
-
-- [`LoginPage` · línea 46](../frontend/src/pages/LoginPage.jsx#L46)
-- [`updateValue` · línea 61](../frontend/src/pages/LoginPage.jsx#L61)
-- [`validate` · línea 66](../frontend/src/pages/LoginPage.jsx#L66)
-- [`submit` · línea 77](../frontend/src/pages/LoginPage.jsx#L77)
-
-### [frontend/src/pages/ProfilePage.jsx](../frontend/src/pages/ProfilePage.jsx)
-
-Pantalla ProfilePage. Coordina presentación y eventos; seguir los servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los datos.
-
-**Se conecta con:** [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx), [frontend/src/components/profile/EmailChangeForm.jsx](../frontend/src/components/profile/EmailChangeForm.jsx), [frontend/src/components/profile/PasswordChangeForm.jsx](../frontend/src/components/profile/PasswordChangeForm.jsx), [frontend/src/components/profile/ProfileDetailsForm.jsx](../frontend/src/components/profile/ProfileDetailsForm.jsx), [frontend/src/services/userService.js](../frontend/src/services/userService.js).
-
-**Funciones para buscar:**
-
-- [`ProfilePage` · línea 17](../frontend/src/pages/ProfilePage.jsx#L17)
-
-### [frontend/src/pages/RegisterPage.jsx](../frontend/src/pages/RegisterPage.jsx)
-
-Pantalla RegisterPage. Coordina presentación y eventos; seguir los servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los datos.
-
-**Se conecta con:** [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx), [frontend/src/components/AuthLayout.jsx](../frontend/src/components/AuthLayout.jsx), [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx), [frontend/src/components/PasswordStrength.jsx](../frontend/src/components/PasswordStrength.jsx), [frontend/src/components/TextField.jsx](../frontend/src/components/TextField.jsx), [frontend/src/components/SocialLoginButtons.jsx](../frontend/src/components/SocialLoginButtons.jsx), [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js), [frontend/src/services/authService.js](../frontend/src/services/authService.js), [frontend/src/utils/validators.js](../frontend/src/utils/validators.js).
-
-**Funciones para buscar:**
-
-- [`RegisterPage` · línea 37](../frontend/src/pages/RegisterPage.jsx#L37)
-- [`updateValue` · línea 153](../frontend/src/pages/RegisterPage.jsx#L153)
-- [`markTouched` · línea 160](../frontend/src/pages/RegisterPage.jsx#L160)
-- [`submit` · línea 164](../frontend/src/pages/RegisterPage.jsx#L164)
-
-### [frontend/src/services/adminService.js](../frontend/src/services/adminService.js)
-
-Servicio reutilizable de la aplicación. Separa operaciones de datos o comunicación de la presentación; sus funciones importadas indican si la operación es local, HTTP o de servidor.
-
-**Se conecta con:** [frontend/src/services/apiClient.js](../frontend/src/services/apiClient.js).
-
-**Funciones para buscar:**
-
-- [`fetchUsers` · línea 10](../frontend/src/services/adminService.js#L10)
-- [`fetchAuditEvents` · línea 14](../frontend/src/services/adminService.js#L14)
-- [`updateUserAdmin` · línea 19](../frontend/src/services/adminService.js#L19)
-
-### [frontend/src/services/apiClient.js](../frontend/src/services/apiClient.js)
-
-Puente HTTP común: envía cookies, agrega CSRF y transforma respuestas en errores legibles. Si vence el acceso intenta una renovación compartida y reintenta una sola vez.
-
-**Funciones para buscar:**
-
-- [`setCsrfToken` · línea 27](../frontend/src/services/apiClient.js#L27)
-- [`clearCsrfToken` · línea 32](../frontend/src/services/apiClient.js#L32)
-- [`isUnsafeMethod` · línea 36](../frontend/src/services/apiClient.js#L36)
-- [`parseResponse` · línea 40](../frontend/src/services/apiClient.js#L40)
-- [`refreshSession` · línea 60](../frontend/src/services/apiClient.js#L60): Comparte una promesa de renovación entre solicitudes concurrentes. Actualiza CSRF con la respuesta y libera la promesa al terminar, también si falla.
-- [`apiRequest` · línea 94](../frontend/src/services/apiClient.js#L94): Serializa el cuerpo, envía cookies y CSRF y convierte errores HTTP en ApiError. Ante 401 puede renovar y reintentar una vez; no confundir una respuesta fallida con éxito visual.
-
-### [frontend/src/services/authService.js](../frontend/src/services/authService.js)
-
-Funciones pequeñas para registro, acceso, sesión y proveedores. Mantienen las direcciones HTTP fuera de los formularios y delegan el transporte a apiClient.
-
-**Se conecta con:** [frontend/src/services/apiClient.js](../frontend/src/services/apiClient.js).
-
-**Funciones para buscar:**
-
-- [`registerUser` · línea 16](../frontend/src/services/authService.js#L16)
-- [`loginUser` · línea 26](../frontend/src/services/authService.js#L26)
-- [`getCurrentUser` · línea 36](../frontend/src/services/authService.js#L36)
-- [`logoutUser` · línea 45](../frontend/src/services/authService.js#L45)
-- [`checkAvailability` · línea 56](../frontend/src/services/authService.js#L56)
-- [`getOAuthProviders` · línea 68](../frontend/src/services/authService.js#L68)
-- [`getOAuthStartUrl` · línea 74](../frontend/src/services/authService.js#L74)
-
-### [frontend/src/services/codeService.js](../frontend/src/services/codeService.js)
-
-Servicio reutilizable de la aplicación. Separa operaciones de datos o comunicación de la presentación; sus funciones importadas indican si la operación es local, HTTP o de servidor.
-
-**Se conecta con:** [frontend/src/services/apiClient.js](../frontend/src/services/apiClient.js).
-
-**Funciones para buscar:**
-
-- [`post` · línea 10](../frontend/src/services/codeService.js#L10)
-- [`requestCode` · línea 13](../frontend/src/services/codeService.js#L13)
-- [`confirmCode` · línea 14](../frontend/src/services/codeService.js#L14)
-- [`resetPassword` · línea 15](../frontend/src/services/codeService.js#L15)
-- [`requestEmailChange` · línea 16](../frontend/src/services/codeService.js#L16)
-- [`confirmEmailChange` · línea 18](../frontend/src/services/codeService.js#L18)
-
-### [frontend/src/services/userService.js](../frontend/src/services/userService.js)
-
-Servicio reutilizable de la aplicación. Separa operaciones de datos o comunicación de la presentación; sus funciones importadas indican si la operación es local, HTTP o de servidor.
-
-**Se conecta con:** [frontend/src/services/apiClient.js](../frontend/src/services/apiClient.js).
-
-**Funciones para buscar:**
-
-- [`updateProfile` · línea 10](../frontend/src/services/userService.js#L10)
-- [`changePassword` · línea 16](../frontend/src/services/userService.js#L16)
-- [`getOAuthAccounts` · línea 22](../frontend/src/services/userService.js#L22)
-
-### [frontend/src/utils/socialLogin.js](../frontend/src/utils/socialLogin.js)
-
-Ayudas compartidas para transformar o validar datos. Usarlas desde varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito en la interfaz.
-
-**Funciones para buscar:**
-
-- [`isSocialProviderReady` · línea 11](../frontend/src/utils/socialLogin.js#L11)
-
-### [frontend/src/utils/validators.js](../frontend/src/utils/validators.js)
-
-Ayudas compartidas para transformar o validar datos. Usarlas desde varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito en la interfaz.
-
-**Funciones para buscar:**
-
-- [`evaluatePassword` · línea 29](../frontend/src/utils/validators.js#L29)
-- [`validateEmail` · línea 43](../frontend/src/utils/validators.js#L43)
-- [`validateUsername` · línea 54](../frontend/src/utils/validators.js#L54)
-- [`validateDisplayName` · línea 65](../frontend/src/utils/validators.js#L65)
-- [`validatePassword` · línea 75](../frontend/src/utils/validators.js#L75)
-- [`validateConfirmPassword` · línea 83](../frontend/src/utils/validators.js#L83)
-- [`fieldErrorsToObject` · línea 89](../frontend/src/utils/validators.js#L89)
-
-### [frontend/tests/socialLogin.test.js](../frontend/tests/socialLogin.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Se conecta con:** [frontend/src/utils/socialLogin.js](../frontend/src/utils/socialLogin.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-### [frontend/tests/validators.test.js](../frontend/tests/validators.test.js)
-
-Pruebas automatizadas y sus ayudas locales. Leer las aserciones para conocer qué comportamiento se comprueba; no equivalen por sí solas a una prueba real de correo, hosting o teléfono.
-
-**Se conecta con:** [frontend/src/utils/validators.js](../frontend/src/utils/validators.js).
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
-
-
-### [frontend/vite.config.js](../frontend/vite.config.js)
-
-Configuración de Vite para desarrollo/compilación del frontend. Revisar aquí plugins, servidor y proxy cuando estén definidos; no es el backend de cuentas.
-
-Este archivo define composición, datos, configuración, tipos o reexportaciones. Seguir sus importaciones o buscar dónde se utiliza para ver el efecto en la aplicación.
+| Archivo | Responsabilidad | Funciones y líneas |
+| --- | --- | --- |
+| [frontend/eslint.config.js](../frontend/eslint.config.js) | Configuración o composición del módulo. | Declaraciones o configuración. |
+| [frontend/package.json](../frontend/package.json) | Configuración o composición del módulo. | Declaraciones o configuración. |
+| [frontend/src/App.jsx](../frontend/src/App.jsx) | Define rutas publicas, privadas y admin. Resuelve navegacion y proteccion de vistas. | [App · 36](../frontend/src/App.jsx#L36) |
+| [frontend/src/components/Alert.jsx](../frontend/src/components/Alert.jsx) | Mensajes accesibles de exito/error/info. | [Alert · 17](../frontend/src/components/Alert.jsx#L17) |
+| [frontend/src/components/AppShell.jsx](../frontend/src/components/AppShell.jsx) | Marco de la aplicación: marca, navegación por permisos, tema y cierre de sesión. La ruta solo determina la distribución visual; los permisos reales permanecen en ProtectedRoute y, de forma autoritativa, en los middleware de Express. | [AppShell · 26](../frontend/src/components/AppShell.jsx#L26) |
+| [frontend/src/components/AuthLayout.jsx](../frontend/src/components/AuthLayout.jsx) | Marco visual de los recorridos públicos. Solo compone presentación: los formularios conservan sus validaciones, estado y llamadas a la API. La ilustración es decorativa y está excluida del árbol de accesibilidad. | [AuthLayout · 62](../frontend/src/components/AuthLayout.jsx#L62) |
+| [frontend/src/components/Button.jsx](../frontend/src/components/Button.jsx) | Boton reutilizable con icono y loading. | [Button · 12](../frontend/src/components/Button.jsx#L12) |
+| [frontend/src/components/FormStatus.jsx](../frontend/src/components/FormStatus.jsx) | Presenta mensajes accesibles de formularios reutilizando Alert. | [FormStatus · 10](../frontend/src/components/FormStatus.jsx#L10) |
+| [frontend/src/components/PasswordStrength.jsx](../frontend/src/components/PasswordStrength.jsx) | Muestra reglas de contrasena en tiempo real. | [PasswordStrength · 11](../frontend/src/components/PasswordStrength.jsx#L11) |
+| [frontend/src/components/ProtectedRoute.jsx](../frontend/src/components/ProtectedRoute.jsx) | Componente guardia de rutas autenticadas/admin. Resuelve proteccion visual complementaria al backend. | [ProtectedRoute · 17](../frontend/src/components/ProtectedRoute.jsx#L17) |
+| [frontend/src/components/SocialLoginButtons.jsx](../frontend/src/components/SocialLoginButtons.jsx) | Muestra botones sociales responsive y navega al inicio OAuth real del backend. | [SocialLoginButtons · 28](../frontend/src/components/SocialLoginButtons.jsx#L28), [resetNavigation · 39](../frontend/src/components/SocialLoginButtons.jsx#L39), [begin · 72](../frontend/src/components/SocialLoginButtons.jsx#L72) |
+| [frontend/src/components/TextField.jsx](../frontend/src/components/TextField.jsx) | Input accesible reutilizable con errores y mostrar/ocultar contrasena. | [TextField · 20](../frontend/src/components/TextField.jsx#L20) |
+| [frontend/src/components/ThemeToggle.jsx](../frontend/src/components/ThemeToggle.jsx) | Boton que alterna claro/oscuro. | [ThemeToggle · 15](../frontend/src/components/ThemeToggle.jsx#L15) |
+| [frontend/src/components/admin/AuditActivity.jsx](../frontend/src/components/admin/AuditActivity.jsx) | Panel de actividad de R5. Consulta páginas de auditoría, aplica el filtro de acción y presenta los eventos autorizados por el backend. | [AuditActivity · 31](../frontend/src/components/admin/AuditActivity.jsx#L31) |
+| [frontend/src/components/admin/UserManagement.jsx](../frontend/src/components/admin/UserManagement.jsx) | Panel admin para listar usuarios y cambiar rol/estado sin exponer hashes. | [UserManagement · 15](../frontend/src/components/admin/UserManagement.jsx#L15), [updateDraft · 73](../frontend/src/components/admin/UserManagement.jsx#L73), [saveUser · 90](../frontend/src/components/admin/UserManagement.jsx#L90) |
+| [frontend/src/components/profile/EmailChangeForm.jsx](../frontend/src/components/profile/EmailChangeForm.jsx) | Confirma cambios de email con contrasena local y codigo Mailtrap. | [EmailChangeForm · 25](../frontend/src/components/profile/EmailChangeForm.jsx#L25) |
+| [frontend/src/components/profile/PasswordChangeForm.jsx](../frontend/src/components/profile/PasswordChangeForm.jsx) | Cambia una clave existente o crea una para cuentas nacidas por OAuth. | [PasswordChangeForm · 23](../frontend/src/components/profile/PasswordChangeForm.jsx#L23) |
+| [frontend/src/components/profile/ProfileDetailsForm.jsx](../frontend/src/components/profile/ProfileDetailsForm.jsx) | Edita datos no sensibles; el email se verifica por un recorrido separado. | [ProfileDetailsForm · 25](../frontend/src/components/profile/ProfileDetailsForm.jsx#L25) |
+| [frontend/src/context/AuthContext.jsx](../frontend/src/context/AuthContext.jsx) | Mantiene sesion frontend y sincroniza usuario/CSRF. Resuelve login, registro, logout y usuario autenticado. | [AuthProvider · 35](../frontend/src/context/AuthContext.jsx#L35) |
+| [frontend/src/context/ThemeContext.jsx](../frontend/src/context/ThemeContext.jsx) | Mantiene tema claro/oscuro persistido. Resuelve requisito de modo claro/oscuro. | [getInitialTheme · 17](../frontend/src/context/ThemeContext.jsx#L17), [ThemeProvider · 32](../frontend/src/context/ThemeContext.jsx#L32) |
+| [frontend/src/hooks/useAuth.js](../frontend/src/hooks/useAuth.js) | Hook seguro para consumir AuthContext. Resuelve acceso atomizado a sesion. | [useAuth · 11](../frontend/src/hooks/useAuth.js#L11) |
+| [frontend/src/hooks/useCooldown.js](../frontend/src/hooks/useCooldown.js) | Muestra la espera visual para reenviar codigos; el limite real queda en backend. | [useCooldown · 12](../frontend/src/hooks/useCooldown.js#L12) |
+| [frontend/src/hooks/useForm.js](../frontend/src/hooks/useForm.js) | Comparte el borrador, la validación y los errores de los formularios de R5. | [useForm · 18](../frontend/src/hooks/useForm.js#L18), [field · 31](../frontend/src/hooks/useForm.js#L31), [run · 47](../frontend/src/hooks/useForm.js#L47), [submit · 71](../frontend/src/hooks/useForm.js#L71), [reset · 86](../frontend/src/hooks/useForm.js#L86) |
+| [frontend/src/hooks/useTheme.js](../frontend/src/hooks/useTheme.js) | Hook seguro para consumir ThemeContext. Resuelve acceso atomizado al tema. | [useTheme · 15](../frontend/src/hooks/useTheme.js#L15) |
+| [frontend/src/main.jsx](../frontend/src/main.jsx) | Monta React con Router, AuthProvider y ThemeProvider. Resuelve entrada de frontend y contextos globales. | Declaraciones o configuración. |
+| [frontend/src/pages/AdminPage.jsx](../frontend/src/pages/AdminPage.jsx) | Página administrativa de R5. Alterna la gestión de usuarios y el listado de auditoría dentro de una ruta reservada a administradores. | [AdminPage · 17](../frontend/src/pages/AdminPage.jsx#L17) |
+| [frontend/src/pages/CodePage.jsx](../frontend/src/pages/CodePage.jsx) | Reutiliza una vista para verificar email, desbloquear y recuperar contrasena. | [CodePage · 43](../frontend/src/pages/CodePage.jsx#L43), [sendCode · 107](../frontend/src/pages/CodePage.jsx#L107) |
+| [frontend/src/pages/HomePage.jsx](../frontend/src/pages/HomePage.jsx) | Evita una portada redundante y dirige al unico acceso logico del sistema. | [HomePage · 15](../frontend/src/pages/HomePage.jsx#L15) |
+| [frontend/src/pages/LoginPage.jsx](../frontend/src/pages/LoginPage.jsx) | Formulario de login con validacion local y errores genericos. | [LoginPage · 52](../frontend/src/pages/LoginPage.jsx#L52), [updateValue · 71](../frontend/src/pages/LoginPage.jsx#L71), [validate · 81](../frontend/src/pages/LoginPage.jsx#L81), [submit · 98](../frontend/src/pages/LoginPage.jsx#L98) |
+| [frontend/src/pages/ProfilePage.jsx](../frontend/src/pages/ProfilePage.jsx) | Configuración de R5: tarjeta editable y secciones desplegables de seguridad y conexiones. | [ProfilePage · 23](../frontend/src/pages/ProfilePage.jsx#L23) |
+| [frontend/src/pages/RegisterPage.jsx](../frontend/src/pages/RegisterPage.jsx) | Formulario de registro con validacion en tiempo real y chequeo de disponibilidad. | [RegisterPage · 43](../frontend/src/pages/RegisterPage.jsx#L43), [updateValue · 163](../frontend/src/pages/RegisterPage.jsx#L163), [markTouched · 174](../frontend/src/pages/RegisterPage.jsx#L174), [submit · 184](../frontend/src/pages/RegisterPage.jsx#L184) |
+| [frontend/src/pages/WelcomePage.jsx](../frontend/src/pages/WelcomePage.jsx) | Primera pantalla después de cualquier ingreso. El perfil se abre por decisión del usuario. | [WelcomePage · 11](../frontend/src/pages/WelcomePage.jsx#L11) |
+| [frontend/src/services/adminService.js](../frontend/src/services/adminService.js) | Servicios del panel admin. | [fetchUsers · 10](../frontend/src/services/adminService.js#L10), [fetchAuditEvents · 18](../frontend/src/services/adminService.js#L18), [updateUserAdmin · 27](../frontend/src/services/adminService.js#L27) |
+| [frontend/src/services/apiClient.js](../frontend/src/services/apiClient.js) | Cliente HTTP con cookies, CSRF, parseo de errores y refresh automatico. Resuelve comunicacion segura front-back. | [ApiError · 23](../frontend/src/services/apiClient.js#L23), [setCsrfToken · 38](../frontend/src/services/apiClient.js#L38), [clearCsrfToken · 47](../frontend/src/services/apiClient.js#L47), [isUnsafeMethod · 55](../frontend/src/services/apiClient.js#L55), [parseResponse · 64](../frontend/src/services/apiClient.js#L64), [refreshSession · 84](../frontend/src/services/apiClient.js#L84), [apiRequest · 118](../frontend/src/services/apiClient.js#L118) |
+| [frontend/src/services/authService.js](../frontend/src/services/authService.js) | Servicios de autenticacion usados por formularios y contexto. | [registerUser · 21](../frontend/src/services/authService.js#L21), [loginUser · 36](../frontend/src/services/authService.js#L36), [getCurrentUser · 51](../frontend/src/services/authService.js#L51), [logoutUser · 65](../frontend/src/services/authService.js#L65), [checkAvailability · 81](../frontend/src/services/authService.js#L81), [getOAuthProviders · 97](../frontend/src/services/authService.js#L97), [getOAuthStartUrl · 107](../frontend/src/services/authService.js#L107) |
+| [frontend/src/services/codeService.js](../frontend/src/services/codeService.js) | Transporta codigos Mailtrap sin guardarlos en el navegador. | [post · 10](../frontend/src/services/codeService.js#L10), [requestCode · 17](../frontend/src/services/codeService.js#L17), [confirmCode · 22](../frontend/src/services/codeService.js#L22), [resetPassword · 27](../frontend/src/services/codeService.js#L27), [requestEmailChange · 32](../frontend/src/services/codeService.js#L32), [confirmEmailChange · 38](../frontend/src/services/codeService.js#L38) |
+| [frontend/src/services/userService.js](../frontend/src/services/userService.js) | Servicios del perfil propio y cambio de contrasena. | [updateProfile · 10](../frontend/src/services/userService.js#L10), [changePassword · 20](../frontend/src/services/userService.js#L20), [getOAuthAccounts · 30](../frontend/src/services/userService.js#L30) |
+| [frontend/src/styles/auth.css](../frontend/src/styles/auth.css) | Panel editorial y formulario: la misma composición se reutiliza en cinco recorridos. | Declaraciones o configuración. |
+| [frontend/src/styles/base.css](../frontend/src/styles/base.css) | Reglas comunes de lectura, foco y movimiento; no contienen estilos de una pantalla. | Declaraciones o configuración. |
+| [frontend/src/styles/dashboard.css](../frontend/src/styles/dashboard.css) | Paneles privados: grillas fluidas y tablas desplazables sin desbordar la página. | Declaraciones o configuración. |
+| [frontend/src/styles/forms.css](../frontend/src/styles/forms.css) | Controles compartidos por acceso, registro, perfil y administración. | Declaraciones o configuración. |
+| [frontend/src/styles/global.css](../frontend/src/styles/global.css) | Índice de estilos. Cada archivo tiene una responsabilidad y comparte tokens: tema → base → marco → acceso → controles → pantallas privadas. Ningún estilo modifica la autenticación ni el contrato de la API. | Declaraciones o configuración. |
+| [frontend/src/styles/shell.css](../frontend/src/styles/shell.css) | Marco compartido: navegación pública/privada, contenido y pie. | Declaraciones o configuración. |
+| [frontend/src/styles/tokens.css](../frontend/src/styles/tokens.css) | Paleta semántica. El modo oscuro es la base; el claro conserva jerarquía y contraste. | Declaraciones o configuración. |
+| [frontend/src/utils/socialLogin.js](../frontend/src/utils/socialLogin.js) | Disponibilidad del acceso social. Solo habilita el proveedor si la respuesta terminó correctamente y confirmó configured con un booleano verdadero. | [isSocialProviderReady · 9](../frontend/src/utils/socialLogin.js#L9) |
+| [frontend/src/utils/validators.js](../frontend/src/utils/validators.js) | Validadores frontend compartidos. Resuelve feedback inmediato de formularios. | [evaluatePassword · 30](../frontend/src/utils/validators.js#L30), [validateEmail · 49](../frontend/src/utils/validators.js#L49), [validateUsername · 64](../frontend/src/utils/validators.js#L64), [validateDisplayName · 79](../frontend/src/utils/validators.js#L79), [validatePassword · 93](../frontend/src/utils/validators.js#L93), [validateConfirmPassword · 105](../frontend/src/utils/validators.js#L105), [fieldErrorsToObject · 115](../frontend/src/utils/validators.js#L115) |
+| [frontend/tests/socialLogin.test.js](../frontend/tests/socialLogin.test.js) | Pruebas o ayuda de pruebas; leer sus casos y aserciones. | Declaraciones o configuración. |
+| [frontend/tests/validators.test.js](../frontend/tests/validators.test.js) | Contratos de validación del navegador, sin instalar un framework adicional. El backend vuelve a validar las mismas entradas como autoridad final. | Declaraciones o configuración. |
+| [frontend/tests/welcomeProfile.test.js](../frontend/tests/welcomeProfile.test.js) | Regresiones del ingreso y de la tarjeta editable, sin escribir datos personales. | [load · 9](../frontend/tests/welcomeProfile.test.js#L9), [jsx · 21](../frontend/tests/welcomeProfile.test.js#L21), [hooks · 38](../frontend/tests/welcomeProfile.test.js#L38), [nodes · 67](../frontend/tests/welcomeProfile.test.js#L67), [profileEditor · 73](../frontend/tests/welcomeProfile.test.js#L73) |
+| [frontend/vite.config.js](../frontend/vite.config.js) | Desarrollo independiente: Vite solo lee variables de frontend/. /api se redirige a Express para conservar cookies y las rutas existentes. Los secretos de backend/.env no se cargan ni se incorporan al bundle. | Declaraciones o configuración. |
+
+[package.json raíz](../package.json) coordina los workspaces y [render.yaml](../render.yaml) describe el alojamiento.

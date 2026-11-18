@@ -12,11 +12,20 @@ import { withTransaction } from "../config/db.js";
 import { revokeAllUserSessions } from "../models/sessionModel.js";
 import { listAuditLogs } from "../models/auditLogModel.js";
 
+/**
+ * Convierte el parámetro de paginación en un entero positivo o devuelve el valor de respaldo. Evita
+ * páginas negativas o no numéricas.
+ */
 const toPageNumber = (value, fallback) => {
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 };
 
+/**
+ * Atiende el listado reservado a administradores: limita pageSize a 50, consulta perfiles sin
+ * hashes y registra la lectura en auditoría.
+ * Responde {users, total, page, pageSize}; requireAuth y requireRole se ejecutan antes en la ruta.
+ */
 export const getUsers = async (req, res) => {
   const page = toPageNumber(req.query.page, 1);
   const pageSize = Math.min(toPageNumber(req.query.pageSize, 20), 50);
@@ -32,6 +41,13 @@ export const getUsers = async (req, res) => {
   res.json(result);
 };
 
+/**
+ * Recibe id de ruta y role/isActive ya validados. Impide que el administrador se quite su propio
+ * acceso.
+ * En una transacción cambia rol/estado, revoca sesiones si desactiva la cuenta y registra
+ * auditoría.
+ * Devuelve {user}; responde con error si el usuario no existe. La baja es lógica, no borra la fila.
+ */
 export const updateUserAsAdmin = async (req, res) => {
   // Normalizar UUID también antes de comparar identidades administrativas.
   const targetUserId = req.params.id.toLowerCase();
@@ -77,6 +93,11 @@ export const updateUserAsAdmin = async (req, res) => {
   res.json({ user: updatedUser });
 };
 
+/**
+ * Consulta eventos por página y filtro de acción validado y registra que el administrador los leyó.
+ * Responde el resultado paginado; el filtro se pasa como parámetro SQL, nunca se concatena como una
+ * instrucción.
+ */
 export const getAuditLogs = async (req, res) => {
   const page = toPageNumber(req.query.page, 1);
   const pageSize = 20;
@@ -93,6 +114,3 @@ export const getAuditLogs = async (req, res) => {
   res.json(result);
 };
 
-// Exporta: admin controller handlers.
-// Lo utilizan: backend/routes/adminRoutes.js.
-// Depende de: audit/user models and AppError.

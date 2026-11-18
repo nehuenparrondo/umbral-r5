@@ -2,10 +2,6 @@
  * Marco de la aplicación: marca, navegación por permisos, tema y cierre de sesión.
  * La ruta solo determina la distribución visual; los permisos reales permanecen
  * en ProtectedRoute y, de forma autoritativa, en los middleware de Express.
- *
- * Lectura guiada. Componente reutilizable AppShell. Sus props conectan contenido y
- * acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
- * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import {
   Fingerprint,
@@ -21,6 +17,12 @@ import { Button } from "./Button.jsx";
 import { ThemeToggle } from "./ThemeToggle.jsx";
 import { Alert } from "./Alert.jsx";
 
+/**
+ * Envuelve children con la cabecera y navegación compartidas. Consulta sesión/rol para ofrecer los
+ * enlaces y acciones correspondientes.
+ * El contenido de cada pantalla lo decide el router; cerrar sesión se delega al contexto de
+ * autenticación.
+ */
 export function AppShell({ children }) {
   const { isAuthenticated, isAdmin, logout, user, sessionError } = useAuth();
   const { pathname } = useLocation();

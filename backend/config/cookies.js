@@ -11,6 +11,8 @@ import { env } from "./env.js";
 export const ACCESS_COOKIE_NAME = "proyectouno_access";
 export const REFRESH_COOKIE_NAME = "proyectouno_refresh";
 
+// HttpOnly impide leer el JWT desde JavaScript; Secure exige HTTPS cuando corresponde.
+// maxAge es duración de cookie, y el JWT/SQL comprueban también sus propios vencimientos.
 export const accessCookieOptions = {
   httpOnly: true,
   sameSite: "strict",
@@ -38,6 +40,3 @@ export const expiredAccessCookieOptions = {
   maxAge: 0,
 };
 
-// Exporta: cookie names and secure cookie options.
-// Lo utilizan: auth controllers and token/session flows.
-// Depende de: backend/config/env.js.

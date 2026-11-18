@@ -47,6 +47,8 @@ import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from "../config/cookies.js";
 
 const router = Router();
 
+// Lectura de cada endpoint: limitador -> reglas de entrada -> validateRequest ->
+// controlador envuelto en asyncHandler. Si un paso rechaza, el siguiente no se ejecuta.
 router.post(
   "/codes/request",
   codeLimiter,
@@ -94,6 +96,11 @@ router.post("/refresh", authLimiter, asyncHandler(refresh));
 // Consultar sesion al abrir la web es normal: devuelve 200 si es visitante.
 // Las rutas privadas mantienen sus 401/403; aqui no se entregan datos sin verificar.
 router.get("/session", async (req, res, next) => {
+  /**
+   * Respuesta de /session para visitantes sin cookies: user/CSRF vacíos y sin pedir renovación.
+   * Permite abrir el login normalmente sin presentar la ausencia de sesión como un error de
+   * autenticación.
+   */
   const anonymous = () =>
     res.json({
       user: null,
@@ -117,6 +124,3 @@ router.post(
 
 export default router;
 
-// Exporta: authRoutes router.
-// Lo utilizan: backend/app.js under /api/auth.
-// Depende de: auth controllers, auth middlewares, rate limiters, validators, and errors.

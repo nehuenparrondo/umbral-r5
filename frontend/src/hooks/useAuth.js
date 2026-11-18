@@ -1,13 +1,13 @@
 /**
  * Hook seguro para consumir AuthContext. Resuelve acceso atomizado a sesion.
- *
- * Lectura guiada. Hook reutilizable que agrupa estado o comportamiento de React. El nombre
- * use permite reconocer que se consume desde componentes u otros hooks, no como un
- * endpoint del servidor.
  */
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext.jsx";
 
+/**
+ * Devuelve las operaciones y el estado de AuthContext. Lanza un error de programación si se usa
+ * fuera de AuthProvider.
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
 
@@ -18,6 +18,3 @@ export const useAuth = () => {
   return context;
 };
 
-// Exporta: useAuth hook.
-// Lo utilizan: pages and protected UI components.
-// Depende de: React and src/context/AuthContext.jsx.

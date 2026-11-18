@@ -86,7 +86,7 @@ test(
       });
       if (registration.status !== 201) return registration;
 
-      // Completa el mismo recorrido R3 que haria el alumno leyendo Mailtrap.
+      // Confirma el código del alta; en la demostración el alumno lo leería en Mailtrap.
       const mail = [...testOutbox]
         .reverse()
         .find(

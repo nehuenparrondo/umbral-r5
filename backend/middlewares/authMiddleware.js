@@ -97,6 +97,3 @@ export const requireRole = (role) => (req, _res, next) => {
   next();
 };
 
-// Exporta: requireAuth, requireCsrfToken, requireRole.
-// Lo utilizan: protected profile/admin/auth routes.
-// Depende de: backend cookies, token service, models, and errors.

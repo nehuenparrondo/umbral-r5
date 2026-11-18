@@ -1,9 +1,5 @@
 /**
  * Mensajes accesibles de exito/error/info.
- *
- * Lectura guiada. Componente reutilizable Alert. Sus props conectan contenido y acciones
- * con el componente que lo usa; para seguir el dato, buscar sus importaciones y los
- * callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 
@@ -13,6 +9,11 @@ const icons = {
   info: Info,
 };
 
+/**
+ * Presenta children y título opcional con icono según type (info/success/error).
+ * Los errores usan role=alert y los demás role=status para lectores de pantalla. Es un mensaje
+ * integrado, no window.alert.
+ */
 export function Alert({ type = "info", title, children }) {
   const Icon = icons[type] || Info;
 
@@ -30,6 +31,3 @@ export function Alert({ type = "info", title, children }) {
   );
 }
 
-// Exporta: Alert (feedback component).
-// Lo utilizan: LoginPage, RegisterPage, ProfilePage, and AdminPage.
-// Depende de: lucide-react.

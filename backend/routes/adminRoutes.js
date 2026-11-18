@@ -56,6 +56,3 @@ router.patch(
 
 export default router;
 
-// Exporta: adminRoutes router.
-// Lo utilizan: backend/app.js under /api/admin.
-// Depende de: admin controllers, auth/validation middlewares, validators, and errors.

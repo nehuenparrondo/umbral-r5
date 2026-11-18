@@ -27,6 +27,12 @@ const ProfilePage = lazy(() =>
   })),
 );
 
+/**
+ * Compone el mapa de React Router dentro de AppShell: páginas públicas, bienvenida/perfil privados
+ * y administración con rol.
+ * Suspense muestra espera al descargar las páginas privadas. ProtectedRoute decide la navegación
+ * visual; la API comprueba los permisos nuevamente.
+ */
 export default function App() {
   return (
     <AppShell>
@@ -84,6 +90,3 @@ export default function App() {
   );
 }
 
-// Exporta: App (root route component).
-// Lo utilizan: src/main.jsx.
-// Depende de: components, pages, and react-router-dom.

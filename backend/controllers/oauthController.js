@@ -43,6 +43,10 @@ import { hashToken } from "../services/tokenService.js";
 import { AppError } from "../utils/errors.js";
 import { classifyOAuthError } from "../utils/oauthErrors.js";
 
+/**
+ * Compara los valores de state con timingSafeEqual cuando sus longitudes coinciden.
+ * Devuelve un booleano y evita que el comparador criptográfico falle por tamaños diferentes.
+ */
 const safeEqual = (left, right) => {
   const leftBuffer = Buffer.from(String(left || ""));
   const rightBuffer = Buffer.from(String(right || ""));
@@ -52,8 +56,17 @@ const safeEqual = (left, right) => {
   );
 };
 
+/**
+ * Resuelve una ruta del frontend sobre el primer origen permitido. Centraliza el destino local o
+ * público de los retornos OAuth.
+ */
 const clientUrl = (path) => new URL(path, env.clientOrigins[0]).toString();
 
+/**
+ * Traduce el motivo a una lista cerrada de códigos públicos y redirige al login con HTTP 303.
+ * Los errores desconocidos se muestran como provider; no agrega secretos ni respuestas privadas de
+ * la red a la URL.
+ */
 const redirectError = (res, reason) => {
   const allowed = new Set([
     "cancelled",
@@ -72,6 +85,10 @@ const redirectError = (res, reason) => {
   return res.redirect(303, clientUrl(`/login?error=oauth_${code}`));
 };
 
+/**
+ * Expone {providers} con la configuración pública de las redes para los botones del login. No
+ * entrega credenciales OAuth.
+ */
 export const listProviders = (_req, res) => {
   res.json({ providers: listPublicOAuthProviders() });
 };
@@ -178,7 +195,7 @@ const resolveOAuthUser = async ({ provider, profile, client }) => {
     );
     action = "OAUTH_REGISTER";
   } else if (!user.emailVerifiedAt) {
-    // El proveedor confirmado demuestra control del mismo email y completa la verificacion R3.
+    // El email verificado por el proveedor permite completar la verificación de esta cuenta.
     await client.query(
       "UPDATE users SET email_verified_at = now() WHERE id = ? AND email_verified_at IS NULL",
       [user.id],
@@ -305,6 +322,3 @@ export const oauthCallback = async (req, res) => {
   }
 };
 
-// Exporta: provider listing, OAuth start and callback handlers.
-// Lo utilizan: backend/routes/oauthRoutes.js.
-// Depende de: OAuth config/service/models, auth session helpers and database transaction.

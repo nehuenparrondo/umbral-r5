@@ -13,18 +13,32 @@ import { fileURLToPath } from "node:url";
 // No se usan prefijos VITE_ para credenciales: nunca deben llegar al navegador.
 dotenv.config({ path: fileURLToPath(new URL("../.env", import.meta.url)) });
 
+/**
+ * Interpreta una variable de entorno como entero decimal; devuelve fallback si no puede
+ * interpretarla.
+ * No impone por sí misma un rango: los límites específicos corresponden a cada configuración.
+ */
 const toInteger = (value, fallback) => {
   // Convierte variables de entorno numericas y usa fallback si faltan.
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+/**
+ * Usa fallback si la variable no existe; reconoce true, 1 y yes como verdadero sin distinguir
+ * mayúsculas.
+ * Los demás valores presentes se interpretan como falso.
+ */
 const toBoolean = (value, fallback = false) => {
   // Convierte strings comunes de .env en booleanos reales.
   if (value === undefined) return fallback;
   return ["true", "1", "yes"].includes(String(value).toLowerCase());
 };
 
+/**
+ * Lee y recorta una variable obligatoria. Interrumpe el arranque si falta o está vacía para evitar
+ * configuración incompleta.
+ */
 const required = (key) => {
   // Falla al arrancar si falta una credencial/secret obligatorio.
   const value = process.env[key];
@@ -34,6 +48,10 @@ const required = (key) => {
   return value.trim();
 };
 
+/**
+ * Lee una variable opcional y quita espacios exteriores; devuelve una cadena vacía cuando no está
+ * configurada.
+ */
 const optional = (key) => {
   // Los proveedores OAuth son opcionales: la app sigue funcionando sin credenciales sociales.
   const value = process.env[key];
@@ -80,7 +98,7 @@ export const env = {
   databaseUrl: required("DATABASE_URL"),
   databaseSsl: toBoolean(process.env.DATABASE_SSL, nodeEnv === "production"),
   databaseSslCa: optional("DATABASE_SSL_CA").replace(/\\n/g, "\n"),
-  // Mailtrap conserva el transporte SMTP que ya utilizaba el R3 completo.
+  // El backend utiliza SMTP de Mailtrap para entregar los códigos al buzón configurado.
   mailTransport: optional("EMAIL_TRANSPORT") || "smtp",
   smtpHost: optional("SMTP_HOST") || "sandbox.smtp.mailtrap.io",
   smtpPort: toInteger(process.env.SMTP_PORT, 2525),
@@ -149,6 +167,3 @@ export const env = {
   },
 };
 
-// Exporta: env (validated runtime configuration).
-// Lo utilizan: backend config, services, controllers, and server startup.
-// Depende de: dotenv and process.env.

@@ -1,9 +1,5 @@
 /**
  * Cambia una clave existente o crea una para cuentas nacidas por OAuth.
- *
- * Lectura guiada. Componente reutilizable PasswordChangeForm. Sus props conectan contenido
- * y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
- * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { KeyRound } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth.js";
@@ -18,6 +14,12 @@ import { FormStatus } from "../FormStatus.jsx";
 import { PasswordStrength } from "../PasswordStrength.jsx";
 import { TextField } from "../TextField.jsx";
 
+/**
+ * Valida contraseña nueva/confirmación y exige la actual cuando user.hasPassword es true.
+ * Envía los datos al servicio, actualiza el perfil confirmado y vacía los campos después del éxito.
+ * El hash se calcula exclusivamente en el backend; una cuenta social puede establecer aquí su
+ * primera contraseña local.
+ */
 export function PasswordChangeForm() {
   const { user, updateAuthenticatedUser } = useAuth();
   const form = useForm(
@@ -91,6 +93,3 @@ export function PasswordChangeForm() {
   );
 }
 
-// Exporta: PasswordChangeForm.
-// Lo utilizan: ProfilePage.
-// Depende de: session, useForm, password validators and controls.

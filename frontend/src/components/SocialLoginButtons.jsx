@@ -19,6 +19,12 @@ const defaults = [
   { id: "discord", label: "Discord", Icon: FaDiscord },
 ];
 
+/**
+ * Consulta los proveedores habilitados y dibuja los accesos Google/GitHub/Discord con carga, error
+ * y reintento.
+ * Solo permite iniciar redes confirmadas como configuradas por la API y bloquea nuevos clics
+ * durante la salida al proveedor.
+ */
 export function SocialLoginButtons() {
   const [providers, setProviders] = useState([]);
   const [status, setStatus] = useState("loading");
@@ -26,6 +32,10 @@ export function SocialLoginButtons() {
   const [pendingProvider, setPendingProvider] = useState("");
 
   useEffect(() => {
+    /**
+     * Limpia el proveedor pendiente en pageshow. Permite volver desde la red con el botón Atrás sin
+     * dejar el acceso bloqueado por la caché de navegación.
+     */
     const resetNavigation = () => setPendingProvider("");
     window.addEventListener("pageshow", resetNavigation);
     return () => window.removeEventListener("pageshow", resetNavigation);
@@ -53,6 +63,12 @@ export function SocialLoginButtons() {
     };
   }, [attempt]);
 
+  /**
+   * Comprueba disponibilidad y ausencia de otra navegación, marca el proveedor pendiente y abre su
+   * endpoint de inicio.
+   * La redirección completa sale temporalmente de la web; la contraseña social se introduce en la
+   * red, no en este componente.
+   */
   const begin = (providerId) => {
     if (pendingProvider || !isSocialProviderReady(providers, providerId, status))
       return;
@@ -126,6 +142,3 @@ export function SocialLoginButtons() {
   );
 }
 
-// Exporta: SocialLoginButtons.
-// Lo utilizan: LoginPage and RegisterPage.
-// Depende de: React, react-icons and authService.

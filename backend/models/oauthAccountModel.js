@@ -7,6 +7,10 @@
  */
 import { query } from "../config/db.js";
 
+/**
+ * Busca la vinculación por pareja proveedor/identificador externo. Devuelve la fila o null usando
+ * el ejecutor recibido.
+ */
 export const findOAuthAccount = async (
   { provider, providerUserId },
   client = { query },
@@ -24,6 +28,11 @@ export const findOAuthAccount = async (
   return rows[0] || null;
 };
 
+/**
+ * Inserta la relación entre un usuario local y una identidad social y vuelve a leerla.
+ * No guarda la contraseña de la red; el client permite unir esta escritura a la transacción de alta
+ * o vinculación.
+ */
 export const createOAuthAccount = async (
   { userId, provider, providerUserId, emailAtProvider },
   client = { query },
@@ -36,6 +45,10 @@ export const createOAuthAccount = async (
   return findOAuthAccount({ provider, providerUserId }, client);
 };
 
+/**
+ * Devuelve proveedor, email y fecha de las identidades vinculadas a una cuenta. Es el listado
+ * público mostrado en su perfil.
+ */
 export const listOAuthAccountsByUserId = async (userId, client = { query }) => {
   const { rows } = await client.query(
     `SELECT provider, email_at_provider AS "emailAtProvider",
@@ -48,6 +61,3 @@ export const listOAuthAccountsByUserId = async (userId, client = { query }) => {
   return rows;
 };
 
-// Exporta: OAuth account persistence functions.
-// Lo utilizan: OAuth and user controllers.
-// Depende de: backend/config/db.js.

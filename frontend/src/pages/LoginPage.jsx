@@ -43,6 +43,12 @@ const oauthErrors = {
     "El proveedor limitó temporalmente las conexiones desde el servidor. Esperá antes de reintentar o ingresá con otro método.",
 };
 
+/**
+ * Mantiene identifier/password del formulario, valida presencia y llama a login del contexto.
+ * Una sesión existente redirige a bienvenida; EMAIL_VERIFICATION_REQUIRED dirige a verificar email.
+ * Los errores se muestran en la página y los campos nunca se usan directamente para consultar MySQL
+ * desde React.
+ */
 export function LoginPage() {
   const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
@@ -58,11 +64,20 @@ export function LoginPage() {
     return <Navigate to="/bienvenida" replace />;
   }
 
+  /**
+   * Crea el manejador del campo indicado: actualiza su valor y limpia su error previo para que
+   * pueda corregirse.
+   */
   const updateValue = (field) => (event) => {
     setValues((current) => ({ ...current, [field]: event.target.value }));
     setErrors((current) => ({ ...current, [field]: "" }));
   };
 
+  /**
+   * Comprueba identificador no vacío y contraseña presente, publica errores por campo y devuelve si
+   * se puede enviar.
+   * No comprueba si la cuenta existe ni si la contraseña coincide: eso lo decide la API.
+   */
   const validate = () => {
     const nextErrors = {};
 
@@ -74,6 +89,12 @@ export function LoginPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
+  /**
+   * Cancela el submit nativo y evita enviar datos incompletos. Espera login y trata por separado la
+   * verificación pendiente.
+   * Controla el estado de espera y presenta errores; la navegación exitosa pertenece a
+   * AuthProvider.
+   */
   const submit = async (event) => {
     event.preventDefault();
     setStatus({ type: "", message: "" });
@@ -152,6 +173,3 @@ export function LoginPage() {
   );
 }
 
-// Exporta: LoginPage (login view).
-// Lo utilizan: src/App.jsx.
-// Depende de: React, React Router, auth hook, and form components.

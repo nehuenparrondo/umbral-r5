@@ -1,10 +1,6 @@
 /**
  * Define politica de contrasenas. Resuelve longitud, mayuscula, minuscula, numero y
  * simbolo.
- *
- * Lectura guiada. Ayudas compartidas para transformar o validar datos. Usarlas desde
- * varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito
- * en la interfaz.
  */
 export const passwordPolicy = {
   minLength: 10,
@@ -19,12 +15,15 @@ export const passwordRequirements = [
   "Un caracter especial.",
 ];
 
+/**
+ * Devuelve true solo para una cadena con longitud mínima, mayúscula, minúscula, número y símbolo, y
+ * hasta 72 bytes UTF-8.
+ * El límite en bytes evita el truncado de bcrypt. No calcula ni guarda el hash; express-validator
+ * usa este resultado para rechazar el dato.
+ */
 export const validatePasswordStrength = (password) =>
   // bcrypt procesa como maximo 72 bytes: rechazar excedentes evita truncamientos.
   typeof password === "string" &&
   Buffer.byteLength(password, "utf8") <= 72 &&
   passwordPolicy.pattern.test(password);
 
-// Exporta: password policy constants and validators.
-// Lo utilizan: backend validations and admin seed scripts.
-// Depende de: no project files.

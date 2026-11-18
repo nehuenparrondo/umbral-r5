@@ -5,6 +5,11 @@
 import { validationResult } from "express-validator";
 import { AppError } from "../utils/errors.js";
 
+/**
+ * Recoge los resultados de express-validator ejecutado antes en la ruta.
+ * Si no hay errores continúa; si los hay envía AppError 422 con un mensaje por campo para que el
+ * formulario pueda mostrarlos.
+ */
 export const validateRequest = (req, _res, next) => {
   const result = validationResult(req);
 
@@ -21,6 +26,3 @@ export const validateRequest = (req, _res, next) => {
   next(new AppError("Hay datos invalidos.", 422, details));
 };
 
-// Exporta: validateRequest middleware.
-// Lo utilizan: backend route validation chains.
-// Depende de: express-validator and backend/utils/errors.js.

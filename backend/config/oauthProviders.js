@@ -8,12 +8,26 @@
  */
 import { env } from "./env.js";
 
+/**
+ * Usa el retorno configurado para el proveedor o construye el callback de esta API desde
+ * serverOrigin.
+ * La misma dirección debe estar autorizada en el panel de la red o de Auth0.
+ */
 const redirectUri = (provider, configuredUri) =>
   configuredUri || `${env.serverOrigin}/api/auth/oauth/${provider}/callback`;
 
+/**
+ * Indica si existen los valores requeridos para iniciar un proveedor. Comprueba presencia, no
+ * prueba las credenciales contra la red.
+ */
 const configured = (settings) =>
   Boolean(settings.clientId && settings.clientSecret && settings.redirectUri);
 
+/**
+ * Construye la definición de un proveedor directo, agrega su retorno y calcula isConfigured.
+ * Este objeto es privado del backend porque incluye la configuración usada al intercambiar el
+ * código OAuth.
+ */
 const provider = (id, definition) => {
   const finalRedirectUri = redirectUri(id, definition.redirectUri);
   return {
@@ -29,6 +43,11 @@ const auth0IsConfigured = Boolean(
   env.auth0.issuerBaseUrl && env.auth0.clientId && env.auth0.clientSecret,
 );
 
+/**
+ * Extrae el identificador externo quitando el prefijo de conexión del sub de Auth0 hasta el primer
+ * separador |.
+ * Conserva el resto del identificador para buscar siempre la misma vinculación social.
+ */
 const auth0SubjectId = (subject) => {
   // Auth0 usa valores como "github|123"; conservamos el ID original para poder migrar desde OAuth directo.
   const value = String(subject || "");
@@ -36,6 +55,11 @@ const auth0SubjectId = (subject) => {
   return separator >= 0 ? value.slice(separator + 1) : value;
 };
 
+/**
+ * Construye endpoints, scopes, PKCE, OIDC y conexión de una red delegada a Auth0.
+ * Solo la marca configurada cuando sus opciones obligatorias y su habilitación están presentes; el
+ * perfil se normaliza para la cuenta local.
+ */
 const auth0Provider = (id, label) => {
   const issuer = `${env.auth0.issuerBaseUrl}/`;
   const connection = env.auth0.connections[id];
@@ -248,9 +272,18 @@ export const oauthProviders = Object.fromEntries(
   ]),
 );
 
+/**
+ * Busca una definición por su identificador en minúsculas. Devuelve null si la red no existe; el
+ * controlador decide cómo informar el error.
+ */
 export const getOAuthProvider = (providerId) =>
   oauthProviders[String(providerId || "").toLowerCase()] || null;
 
+/**
+ * Devuelve únicamente id, etiqueta, disponibilidad, broker y conexión para dibujar los botones.
+ * Excluye claves y configuración privada; configured no garantiza que el servicio externo esté
+ * disponible en ese momento.
+ */
 export const listPublicOAuthProviders = () =>
   Object.values(oauthProviders).map(
     ({ id, label, isConfigured, broker, connection }) => ({
@@ -262,6 +295,3 @@ export const listPublicOAuthProviders = () =>
     }),
   );
 
-// Exporta: oauthProviders, getOAuthProvider and listPublicOAuthProviders.
-// Lo utilizan: OAuth service and controller.
-// Depende de: backend/config/env.js.

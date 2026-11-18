@@ -7,6 +7,10 @@
 import rateLimit from "express-rate-limit";
 import { env } from "../config/env.js";
 
+/**
+ * Respuesta compartida HTTP 429 cuando se agotó el límite de solicitudes.
+ * La ventana y cantidad permitida dependen del limitador de cada ruta, no del botón del frontend.
+ */
 const jsonRateLimitHandler = (_req, res) => {
   res.status(429).json({
     message: "Demasiados intentos. Proba nuevamente mas tarde.",
@@ -69,6 +73,3 @@ export const codeAttemptLimiter = rateLimit({
   handler: jsonRateLimitHandler,
 });
 
-// Exporta: rate-limit middlewares for auth, OAuth and email codes.
-// Lo utilizan: auth routes.
-// Depende de: express-rate-limit.

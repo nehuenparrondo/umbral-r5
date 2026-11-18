@@ -34,6 +34,12 @@ const initialValues = {
   confirmPassword: "",
 };
 
+/**
+ * Coordina validación local, disponibilidad remota y envío del alta. La consulta de duplicados se
+ * retrasa 450 ms y cancela respuestas anteriores.
+ * Tras el registro navega a verificar email con el desafío devuelto. No abre la sesión ni guarda
+ * una contraseña en el navegador.
+ */
 export function RegisterPage() {
   // El alta no inicia sesión: requiere confirmar el correo mediante un código.
   const { isAuthenticated, register } = useAuth();
@@ -150,6 +156,10 @@ export function RegisterPage() {
       : "",
   };
 
+  /**
+   * Actualiza el campo, lo marca tocado y descarta su error remoto anterior. La disponibilidad se
+   * vuelve a consultar mediante el efecto del componente.
+   */
   const updateValue = (field) => (event) => {
     // Actualiza un campo sin mutar el estado previo.
     setValues((current) => ({ ...current, [field]: event.target.value }));
@@ -157,10 +167,20 @@ export function RegisterPage() {
     setServerErrors((current) => ({ ...current, [field]: "" }));
   };
 
+  /**
+   * Devuelve el manejador de desenfoque de un campo para habilitar sus mensajes de validación sin
+   * esperar al envío.
+   */
   const markTouched = (field) => () => {
     setTouched((current) => ({ ...current, [field]: true }));
   };
 
+  /**
+   * Marca los campos como tocados, detiene datos inválidos/duplicados conocidos y envía el alta al
+   * contexto.
+   * Navega al código solo si el servidor confirma; un conflicto SQL posterior se presenta como
+   * error del formulario.
+   */
   const submit = async (event) => {
     // Evita submit HTML tradicional para manejar feedback en React.
     event.preventDefault();
@@ -294,6 +314,3 @@ export function RegisterPage() {
   );
 }
 
-// Exporta: RegisterPage (registration view).
-// Lo utilizan: src/App.jsx.
-// Depende de: React, React Router, auth services, auth hook, validators, and UI components.

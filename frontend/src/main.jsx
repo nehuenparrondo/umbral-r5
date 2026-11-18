@@ -14,6 +14,8 @@ import { AuthProvider } from "./context/AuthContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import "./styles/global.css";
 
+// BrowserRouter debe envolver AuthProvider porque este usa useNavigate al ingresar.
+// ThemeProvider comparte apariencia; AuthProvider comparte la sesión pública con App.
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ThemeProvider>
@@ -26,6 +28,3 @@ createRoot(document.getElementById("root")).render(
   </StrictMode>,
 );
 
-// Exporta: no named exports; it mounts the React app.
-// Lo utilizan: index.html through Vite.
-// Depende de: React, React Router, App, context providers, and global CSS.

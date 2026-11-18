@@ -21,6 +21,13 @@ import {
 import { AppError } from "../utils/errors.js";
 import { normalizeIdentifier } from "../utils/normalizers.js";
 
+/**
+ * Para la cuenta autenticada, comprueba la contraseña actual y que el email nuevo sea distinto y
+ * esté libre.
+ * Una cuenta social debe crear antes una contraseña local. Emite un desafío change_email al nuevo
+ * destino y responde 202.
+ * Todavía no modifica users.email: el cambio requiere confirmar el código.
+ */
 export async function requestEmailChange(req, res) {
   const user = await findUserByIdForPassword(req.user.id);
   if (
@@ -56,6 +63,12 @@ export async function requestEmailChange(req, res) {
   );
 }
 
+/**
+ * Consume el desafío change_email comprobando que pertenezca a req.user.
+ * En la misma transacción cambia y verifica el email, invalida desafíos, revoca otras sesiones y
+ * audita.
+ * Devuelve el perfil actualizado; un código inválido o un fallo SQL impiden confirmar el cambio.
+ */
 export async function confirmEmailChange(req, res) {
   const user = await consumeChallenge(
     { ...req.body, purpose: "change_email", expectedUserId: req.user.id },
@@ -87,6 +100,3 @@ export async function confirmEmailChange(req, res) {
   res.json({ user, message: "Email actualizado." });
 }
 
-// Exporta: requestEmailChange and confirmEmailChange.
-// Lo utilizan: userRoutes.
-// Depende de: challenges, user/session/audit models and bcrypt.

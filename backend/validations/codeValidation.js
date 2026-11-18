@@ -46,6 +46,3 @@ export const resetPasswordValidation = [
   }),
 ];
 
-// Exporta: validation chains for email-code flows.
-// Lo utilizan: authRoutes.
-// Depende de: express-validator and the shared password policy.

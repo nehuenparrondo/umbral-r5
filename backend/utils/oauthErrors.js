@@ -1,7 +1,5 @@
 /**
- * Guía de lectura. Ayudas compartidas para transformar o validar datos. Usarlas desde
- * varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito
- * en la interfaz.
+ * Clasificación de errores sociales de R5. Convierte motivos externos en códigos públicos permitidos sin reflejar descripciones privadas del proveedor.
  */
 
 /**

@@ -73,6 +73,3 @@ export const availabilityValidation = [
     .withMessage("Username invalido."),
 ];
 
-// Exporta: auth route validation chains.
-// Lo utilizan: backend/routes/authRoutes.js.
-// Depende de: express-validator and backend/utils/passwordPolicy.js.

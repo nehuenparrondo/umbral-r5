@@ -9,6 +9,11 @@ import { createContext, useEffect, useMemo, useState } from "react";
 
 export const ThemeContext = createContext(null);
 
+/**
+ * Lee la preferencia visual local si es light/dark; ante ausencia o bloqueo de almacenamiento usa
+ * dark.
+ * Es una preferencia de apariencia, no información de autenticación.
+ */
 const getInitialTheme = () => {
   try {
     const savedTheme = localStorage.getItem("proyectouno-theme");
@@ -19,6 +24,11 @@ const getInitialTheme = () => {
   return "dark";
 };
 
+/**
+ * Comparte theme/toggleTheme y aplica data-theme al documento para activar las variables CSS.
+ * Intenta conservar la elección en localStorage y sigue funcionando si el navegador impide
+ * guardarla.
+ */
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(getInitialTheme);
 
@@ -47,6 +57,3 @@ export function ThemeProvider({ children }) {
   );
 }
 
-// Exporta: ThemeContext and ThemeProvider.
-// Lo utilizan: src/main.jsx and src/hooks/useTheme.js.
-// Depende de: React hooks and browser localStorage.

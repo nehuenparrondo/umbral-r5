@@ -7,10 +7,20 @@
 import { env } from "../config/env.js";
 import { AppError } from "../utils/errors.js";
 
+/**
+ * Convierte una ruta HTTP sin coincidencias en AppError 404 y la envía al manejador central
+ * mediante next.
+ */
 export const notFoundHandler = (req, _res, next) => {
   next(new AppError(`Ruta no encontrada: ${req.originalUrl}`, 404));
 };
 
+/**
+ * Último middleware de errores de Express. Traduce fallos de conexión SQL a 503 y conflictos únicos
+ * a 409.
+ * Devuelve message/details/code según el error y oculta detalles internos en respuestas 500; en
+ * desarrollo registra solo datos técnicos acotados.
+ */
 export const errorHandler = (error, _req, res, _next) => {
   // Una interrupcion SQL es un servicio no disponible, no una contrasena mala.
   const unavailable = [
@@ -75,6 +85,3 @@ export const errorHandler = (error, _req, res, _next) => {
   });
 };
 
-// Exporta: notFoundHandler and errorHandler.
-// Lo utilizan: backend/app.js as centralized error handling.
-// Depende de: backend/config/env.js and backend/utils/errors.js.

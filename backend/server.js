@@ -36,6 +36,11 @@ try {
   process.exitCode = 1;
 }
 
+/**
+ * Al recibir SIGINT/SIGTERM deja de aceptar conexiones y, al cerrar el servidor, termina el pool
+ * SQL y el proceso.
+ * Evita dejar conexiones de base abiertas durante un apagado normal.
+ */
 const shutdown = async () => {
   server?.close(async () => {
     await pool.end();
@@ -46,6 +51,3 @@ const shutdown = async () => {
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
-// Exporta: no named exports; it starts the HTTP server.
-// Lo utilizan: npm run dev:server and npm start.
-// Depende de: backend/app.js, backend/config/env.js, backend/config/db.js.

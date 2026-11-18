@@ -1,9 +1,5 @@
 /**
  * Confirma cambios de email con contrasena local y codigo Mailtrap.
- *
- * Lectura guiada. Componente reutilizable EmailChangeForm. Sus props conectan contenido y
- * acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
- * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { Check, Mail } from "lucide-react";
 import { useState } from "react";
@@ -19,6 +15,13 @@ import { Button } from "../Button.jsx";
 import { FormStatus } from "../FormStatus.jsx";
 import { TextField } from "../TextField.jsx";
 
+/**
+ * Coordina dos pasos: solicitar el cambio con contraseña actual y confirmar el código recibido en
+ * el nuevo email.
+ * challengeId distingue las etapas. Solo al confirmar actualiza el usuario del contexto y limpia el
+ * formulario.
+ * Una cuenta social sin contraseña muestra la instrucción de crearla antes de cambiar el email.
+ */
 export function EmailChangeForm() {
   const { user, updateAuthenticatedUser } = useAuth();
   const [challengeId, setChallengeId] = useState("");
@@ -130,6 +133,3 @@ export function EmailChangeForm() {
   );
 }
 
-// Exporta: EmailChangeForm.
-// Lo utilizan: ProfilePage.
-// Depende de: Mailtrap code services, session, useForm and controls.

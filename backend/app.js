@@ -50,6 +50,8 @@ app.use(
   }),
 );
 
+// El orden importa: interpretar JSON/cookies antes de las rutas; errores al final.
+// CORS permite cookies solo desde los orígenes configurados, pero no autentica usuarios.
 app.use(express.json({ limit: "20kb" }));
 app.use(cookieParser());
 
@@ -79,6 +81,8 @@ app.use("/api/admin", adminRoutes);
 // Una API desconocida siempre devuelve JSON 404, incluso en produccion.
 app.use("/api", notFoundHandler);
 
+// Render sirve dist y devuelve index.html para rutas como /perfil: React Router las
+// resuelve en el navegador. Las rutas /api ya se resolvieron antes y conservan JSON 404.
 if (env.isProduction) {
   app.use(express.static(clientDistPath));
   app.get(/.*/, (_req, res) => {
@@ -91,6 +95,3 @@ app.use(errorHandler);
 
 export default app;
 
-// Exporta: configured Express application.
-// Lo utilizan: backend/server.js and potential tests.
-// Depende de: Express security middleware, env config, routes, errors, and error handlers.

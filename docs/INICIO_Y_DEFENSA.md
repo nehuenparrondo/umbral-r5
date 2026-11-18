@@ -45,7 +45,10 @@ No mostrar hashes, códigos HMAC, tokens, contraseñas SQL ni archivos .env en u
 1. Registrar una cuenta: debe verificar el email con el código de Mailtrap antes de ingresar.
 2. Repetir email/username con mayúsculas y espacios: los índices únicos normalizados lo impiden.
 3. Probar contraseña incorrecta y recuperación por código sin enumerar cuentas.
-4. Ingresar, editar el perfil, cambiar contraseña/email siguiendo sus confirmaciones.
+4. Ingresar, mostrar la bienvenida y abrir Configurar mi perfil. Editar la tarjeta,
+   cancelar un borrador y guardar otro. Mostrar las opciones de contraseña/email
+   siguiendo sus confirmaciones. Para cambiar email se exige una contraseña local;
+   una cuenta social debe crearla antes.
 5. Mostrar Google, GitHub y Discord y sus filas en Cuentas vinculadas.
 6. Con un admin, listar usuarios y actividad. Una cuenta normal recibe 403 incluso llamando directamente a la API.
 7. Desactivar una cuenta normal: se revocan sus sesiones. Reactivarla no revive las sesiones viejas.
@@ -69,4 +72,9 @@ Las suites MySQL crean bases/cuentas temporales con nombres aleatorios. Solo eli
 
 No copiar archivos de una base en ejecución desde OneDrive para respaldarla: hacer un respaldo lógico con mysqldump o detener el servidor primero. No entregar .local, node_modules ni secretos.
 
-Para el enlace público se necesita un hosting Node y una base MySQL remota. FreeDB por sí solo no publica React/Express. Seguir docs/MYSQL_Y_HOSTING.md y verificar los tres proveedores en el dominio definitivo.
+La publicación preparada usa [Render](https://umbral-r5.onrender.com) para la web
+y la API, y MySQL de Aiven, base defaultdb, para los datos. La instalación local
+usa umbral_r5 en el puerto 3307; son bases diferentes. FreeDB no aloja esta web.
+Consultar [la guía actual del código](LEER-EL-CODIGO.md) y
+[la configuración de MySQL y alojamiento](MYSQL_Y_HOSTING.md) para distinguir
+los entornos y verificar los retornos de los proveedores.

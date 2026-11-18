@@ -146,6 +146,3 @@ export async function resetPassword(req, res) {
   res.json({ message: "Contrasena actualizada. Inicia sesion nuevamente." });
 }
 
-// Exporta: requestCode, confirmCode and resetPassword.
-// Lo utilizan: authRoutes.
-// Depende de: challenges, auth sessions, MySQL models and bcrypt.

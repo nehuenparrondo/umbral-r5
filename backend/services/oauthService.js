@@ -16,8 +16,17 @@ const jwksCache = new Map();
 const PROFILE_TIMEOUT_MS = 10_000;
 const endpointCooldowns = new Map();
 
+/**
+ * Codifica un Buffer con el alfabeto seguro para URL y sin padding. Se usa para los valores
+ * aleatorios de PKCE/state.
+ */
 const base64Url = (value) => Buffer.from(value).toString("base64url");
 
+/**
+ * Genera un verificador aleatorio privado y su desafío SHA-256 público.
+ * El desafío viaja al autorizar; el verificador se presenta después al canjear el código, probando
+ * que es la misma operación.
+ */
 export const createPkcePair = () => {
   // RFC 7636: verifier aleatorio y challenge SHA-256 codificado base64url.
   const codeVerifier = base64Url(crypto.randomBytes(48));
@@ -48,9 +57,18 @@ export const createOAuthTransaction = (provider) => {
   };
 };
 
+/**
+ * Construye un nombre de cookie por proveedor y fragmento del hash de state.
+ * Permite distinguir intentos OAuth simultáneos sin poner el state legible en el nombre.
+ */
 export const oauthStateCookieName = (providerId, state) =>
   `r5_oauth_${providerId}_${hashToken(state).slice(0, 12)}`;
 
+/**
+ * Define cookie state HttpOnly/SameSite Lax, secure según el entorno, limitada al callback y a diez
+ * minutos.
+ * El mismo alcance debe usarse para eliminarla al procesar el retorno.
+ */
 export const oauthStateCookieOptions = (provider, secure) => ({
   httpOnly: true,
   sameSite: "lax",
@@ -86,6 +104,10 @@ export const buildAuthorizationUrl = (provider, transaction) => {
   return url.toString();
 };
 
+/**
+ * Construye AppError 502 y un diagnóstico acotado de endpoint/estado/motivo para fallos de la red.
+ * Omite query y cuerpo para evitar registrar códigos de autorización o tokens.
+ */
 const oauthRequestFailure = (message, url, status, reason) => {
   const error = new AppError(message, 502);
   const endpoint = new URL(url);
@@ -97,6 +119,12 @@ const oauthRequestFailure = (message, url, status, reason) => {
   return error;
 };
 
+/**
+ * Solicita JSON a un endpoint OAuth con límite de diez segundos y traduce errores del proveedor.
+ * Ante 429 recuerda la espera indicada y rechaza llamadas al mismo endpoint durante ese período.
+ * Devuelve el JSON exitoso o lanza AppError; no hace reintentos automáticos ni expone la respuesta
+ * privada en el mensaje público.
+ */
 const fetchJson = async (url, options = {}) => {
   const endpoint = new URL(url);
   const endpointKey = endpoint.origin + endpoint.pathname;
@@ -229,6 +257,11 @@ export const exchangeCodeForTokens = async (
   return tokens;
 };
 
+/**
+ * Verifica id_token mediante las claves JWKS del emisor, audience y nonce de la transacción.
+ * Reutiliza el resolvedor JWKS por URL y devuelve los claims verificados; cualquier firma/nonce
+ * inválido interrumpe el login.
+ */
 const verifyOidcToken = async (provider, idToken, nonce) => {
   if (!idToken) throw new AppError("Falta el token de identidad OIDC.", 502);
   let jwks = jwksCache.get(provider.oidc.jwksUrl);
@@ -285,6 +318,12 @@ export const fetchNormalizedProfile = async (
   return validateNormalizedProfile(mapped);
 };
 
+/**
+ * Valida y recorta el perfil externo a una forma común: id externo obligatorio, email opcional
+ * válido y nombres acotados.
+ * Solo conserva emailVerified si era true explícito. No decide todavía si crear o vincular una
+ * cuenta.
+ */
 export const validateNormalizedProfile = (profile) => {
   const providerUserId = String(profile?.providerUserId || "").trim();
   const email = profile?.email ? normalizeEmail(profile.email) : null;
@@ -311,6 +350,12 @@ export const validateNormalizedProfile = (profile) => {
   };
 };
 
+/**
+ * Forma una base de username sin acentos ni caracteres fuera de letras, números, punto y guion
+ * bajo.
+ * La limita a 30 caracteres y usa un respaldo si queda demasiado corta; findUniqueUsername resuelve
+ * los duplicados después.
+ */
 export const safeUsernameBase = ({ username, name, provider }) => {
   // Mantiene solo caracteres admitidos por el registro tradicional.
   const source = username || name || `usuario_${provider}`;
@@ -340,6 +385,3 @@ export const decideOAuthAccountAction = ({
   return existingUser ? "link" : "register";
 };
 
-// Exporta: OAuth transaction, URL, token, profile and normalization helpers.
-// Lo utilizan: backend/controllers/oauthController.js and tests.
-// Depende de: node:crypto, jose, token service, normalizers and errors.

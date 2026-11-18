@@ -8,6 +8,10 @@
 import { useContext } from "react";
 import { ThemeContext } from "../context/ThemeContext.jsx";
 
+/**
+ * Devuelve el contexto visual. Exige estar dentro de ThemeProvider para que tema y botón de cambio
+ * compartan la misma preferencia.
+ */
 export const useTheme = () => {
   const context = useContext(ThemeContext);
 
@@ -18,6 +22,3 @@ export const useTheme = () => {
   return context;
 };
 
-// Exporta: useTheme hook.
-// Lo utilizan: theme toggle components.
-// Depende de: React and src/context/ThemeContext.jsx.

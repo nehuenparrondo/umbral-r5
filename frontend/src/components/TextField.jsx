@@ -1,9 +1,5 @@
 /**
  * Input accesible reutilizable con errores y mostrar/ocultar contrasena.
- *
- * Lectura guiada. Componente reutilizable TextField. Sus props conectan contenido y
- * acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
- * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import {
   AtSign,
@@ -15,6 +11,12 @@ import {
 } from "lucide-react";
 import { useId, useState } from "react";
 
+/**
+ * Campo controlado por value/onChange de su formulario; conecta etiqueta, ayuda y error mediante
+ * identificadores accesibles.
+ * Recibe las props nativas del input. En contraseñas, el estado local alterna ocultar/mostrar sin
+ * cambiar el valor ni enviarlo al servidor.
+ */
 export function TextField({
   label,
   error,
@@ -93,6 +95,3 @@ export function TextField({
   );
 }
 
-// Exporta: TextField (accessible input component).
-// Lo utilizan: LoginPage, RegisterPage, and ProfilePage.
-// Depende de: React and lucide-react.

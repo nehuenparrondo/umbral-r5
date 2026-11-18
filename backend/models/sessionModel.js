@@ -8,6 +8,12 @@
 import { randomUUID } from "node:crypto";
 import { query } from "../config/db.js";
 
+/**
+ * Crea un UUID y guarda userId, hash del refresh, vencimiento y contexto de conexión. Devuelve el
+ * id.
+ * El token legible no se persiste; el client opcional permite emitir la sesión dentro de otra
+ * transacción.
+ */
 export const createSession = async (
   { userId, refreshTokenHash, userAgent, ipAddress, expiresAt },
   client = { query },
@@ -28,6 +34,12 @@ export const createSession = async (
   return id;
 };
 
+/**
+ * Busca una sesión no revocada ni vencida a partir del hash del refresh y devuelve también el
+ * estado de su usuario.
+ * No rechaza por sí sola usuarios inactivos/bloqueados: refresh comprueba esas banderas antes de
+ * renovar.
+ */
 export const findValidSessionByRefreshHash = async (refreshTokenHash) => {
   const { rows } = await query(
     `SELECT
@@ -48,6 +60,10 @@ export const findValidSessionByRefreshHash = async (refreshTokenHash) => {
   return rows[0] || null;
 };
 
+/**
+ * Devuelve id/userId de una sesión vigente o null. requireAuth la usa junto con el JWT para
+ * detectar revocaciones inmediatamente.
+ */
 export const findActiveSessionById = async (sessionId) => {
   const { rows } = await query(
     `SELECT id, user_id AS "userId"
@@ -61,6 +77,11 @@ export const findActiveSessionById = async (sessionId) => {
   return rows[0] || null;
 };
 
+/**
+ * Sustituye el hash solo si aún coincide con previousHash y la sesión y cuenta siguen habilitadas.
+ * Devuelve true cuando se actualizó una fila. Esta comparación hace que un refresh viejo no pueda
+ * renovarse dos veces.
+ */
 export const rotateSession = async ({
   sessionId,
   refreshTokenHash,
@@ -80,6 +101,10 @@ export const rotateSession = async ({
   return result.rowCount === 1;
 };
 
+/**
+ * Marca una sesión como revocada si aún estaba activa. Conserva la fila para trazabilidad; no
+ * elimina la cuenta.
+ */
 export const revokeSession = async (sessionId) => {
   await query(
     `UPDATE user_sessions
@@ -90,6 +115,11 @@ export const revokeSession = async (sessionId) => {
   );
 };
 
+/**
+ * Revoca las sesiones de un usuario salvo sessionId. Se usa en cambios sensibles para conservar el
+ * dispositivo actual.
+ * Con client, la revocación se confirma junto con el cambio de contraseña o email.
+ */
 export const revokeUserSessionsExcept = async (
   { userId, sessionId },
   client = { query },
@@ -105,6 +135,10 @@ export const revokeUserSessionsExcept = async (
 };
 
 // Desactivar una cuenta revoca sus sesiones para que no revivan al reactivarla.
+/**
+ * Marca revocadas todas las sesiones pendientes de un usuario. Con client participa en la
+ * transacción del bloqueo o cambio de acceso.
+ */
 export const revokeAllUserSessions = async (userId, client = { query }) => {
   await client.query(
     "UPDATE user_sessions SET revoked_at = now() WHERE user_id = ? AND revoked_at IS NULL",
@@ -112,6 +146,3 @@ export const revokeAllUserSessions = async (userId, client = { query }) => {
   );
 };
 
-// Exporta: session persistence functions.
-// Lo utilizan: auth middleware and auth/user controllers.
-// Depende de: backend/config/db.js and node:crypto.

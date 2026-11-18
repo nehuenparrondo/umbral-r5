@@ -1,5 +1,5 @@
 /**
- * Mantiene el envio SMTP de R3 mediante Mailtrap sin exponer credenciales.
+ * Envía los códigos de R5 por SMTP de Mailtrap con configuración privada del servidor.
  *
  * Lectura guiada. Transporte de códigos mediante SMTP. Lee configuración privada del
  * servidor; tener un mensaje construido no demuestra que el proveedor haya aceptado
@@ -15,6 +15,11 @@ const testing = env.nodeEnv === "test" && env.mailTransport === "test";
 let transport;
 
 // Falla antes de crear estados parciales si faltan las credenciales SMTP.
+/**
+ * Verifica que estén configuradas las credenciales de correo; lanza AppError si no lo están.
+ * Solo permite el transporte en memoria cuando NODE_ENV y MAIL_TRANSPORT indican explícitamente
+ * pruebas.
+ */
 export function ensureMailConfigured() {
   if (!testing && (!env.smtpUser || !env.smtpPassword)) {
     throw new AppError("El envio de correos no esta configurado.", 503);
@@ -22,6 +27,11 @@ export function ensureMailConfigured() {
 }
 
 // Crea una sola conexion reutilizable con TLS y accesos a archivos deshabilitados.
+/**
+ * Crea una sola instancia reutilizable de Nodemailer con autenticación SMTP, TLS obligatorio y
+ * tiempos de espera.
+ * El destino depende del entorno: con Mailtrap Sandbox el mensaje queda en su buzón de pruebas.
+ */
 function getTransport() {
   ensureMailConfigured();
   transport ||= nodemailer.createTransport({
@@ -40,6 +50,12 @@ function getTransport() {
 }
 
 // Envia un codigo con proposito explicito y vencimiento corto.
+/**
+ * Recibe {to, code, purpose} y envía el código ya generado con el texto del propósito
+ * correspondiente.
+ * Exige aceptación SMTP y traduce fallos a un error 503; en pruebas lo agrega al outbox en memoria.
+ * La generación, vencimiento y persistencia del desafío pertenecen a challengeService.
+ */
 export async function sendCode({ to, code, purpose }) {
   ensureMailConfigured();
   const titles = {
@@ -72,8 +88,9 @@ export async function sendCode({ to, code, purpose }) {
 }
 
 // Usado por npm run mail:check para probar conexion y autenticacion sin enviar correo.
+/**
+ * Verifica conexión y autenticación del transporte SMTP sin enviar un correo. Propaga el fallo para
+ * el diagnóstico de configuración.
+ */
 export const verifyMailConnection = () => getTransport().verify();
 
-// Exporta: Mailtrap helpers and a test-only outbox.
-// Lo utilizan: challengeService and checkMail.
-// Depende de: nodemailer, env and AppError.

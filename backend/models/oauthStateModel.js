@@ -7,6 +7,12 @@
  */
 import { query, withTransaction } from "../config/db.js";
 
+/**
+ * Limpia estados vencidos o consumidos y guarda el hash de state, proveedor, verificador PKCE,
+ * nonce y vencimiento.
+ * Estos datos temporales permiten validar el retorno OAuth; el state legible viaja en URL/cookie,
+ * no en esta columna hash.
+ */
 export const createOAuthState = async (
   { stateHash, provider, codeVerifier, nonce, expiresAt },
   client = { query },
@@ -22,7 +28,16 @@ export const createOAuthState = async (
   );
 };
 
+/**
+ * Busca y consume una sola vez un state vigente para el proveedor indicado.
+ * Bloquea la fila para que dos retornos no lo reutilicen. Devuelve verificador PKCE/nonce o null.
+ * Usa la transacción recibida o abre una propia si no se pasó client.
+ */
 export const consumeOAuthState = async ({ stateHash, provider }, client) => {
+  /**
+   * Operación interna ejecutada con una conexión transaccional: toma FOR UPDATE, comprueba vigencia
+   * y marca el state consumido antes de devolverlo.
+   */
   const consume = async (transaction) => {
     const { rows } = await transaction.query(
       `SELECT code_verifier AS "codeVerifier", nonce FROM oauth_login_states
@@ -40,6 +55,3 @@ export const consumeOAuthState = async ({ stateHash, provider }, client) => {
   return client ? consume(client) : withTransaction(consume);
 };
 
-// Exporta: createOAuthState and consumeOAuthState.
-// Lo utilizan: backend/controllers/oauthController.js.
-// Depende de: backend/config/db.js.

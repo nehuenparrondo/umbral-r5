@@ -10,6 +10,7 @@ import { validatePasswordStrength } from "../utils/passwordPolicy.js";
 
 const usernamePattern = /^[A-Za-z0-9_.]{3,30}$/;
 
+/** Valida solo los campos editables de la tarjeta; no admite cambiar rol desde el perfil propio. */
 export const profileValidation = [
   body("username")
     .trim()
@@ -27,6 +28,7 @@ export const profileValidation = [
     .withMessage("El nombre visible no puede contener etiquetas HTML."),
 ];
 
+/** Comprueba formato del email nuevo y presencia de contraseña actual; la comparación bcrypt ocurre en el controlador. */
 export const emailChangeRequestValidation = [
   body("email")
     .trim()
@@ -40,6 +42,7 @@ export const emailChangeRequestValidation = [
     .withMessage("Ingresa tu contrasena actual."),
 ];
 
+/** Exige id de desafío UUID y seis dígitos; vigencia, destinatario y uso único se comprueban en challengeService. */
 export const emailChangeConfirmValidation = [
   body("challengeId").isUUID().withMessage("Solicitud invalida."),
   body("code")
@@ -47,6 +50,7 @@ export const emailChangeConfirmValidation = [
     .withMessage("El codigo debe tener 6 numeros."),
 ];
 
+/** Permite omitir la actual en cuentas sociales sin hash; el controlador decide si es obligatoria según la cuenta real. */
 export const passwordChangeValidation = [
   body("currentPassword")
     .optional({ values: "falsy" })
@@ -65,10 +69,12 @@ export const passwordChangeValidation = [
   }),
 ];
 
+/** Exige UUID en la ruta administrativa antes de consultar o editar el usuario. */
 export const adminUserIdValidation = [
   param("id").isUUID().withMessage("ID de usuario invalido."),
 ];
 
+/** Restringe el rol a user/admin y exige booleano JSON real para isActive. Los permisos se comprueban en la ruta. */
 export const adminUpdateUserValidation = [
   ...adminUserIdValidation,
   body("role").isIn(["user", "admin"]).withMessage("Rol invalido."),
@@ -78,6 +84,3 @@ export const adminUpdateUserValidation = [
     .withMessage("Estado invalido."),
 ];
 
-// Exporta: profile, password, and admin validation chains.
-// Lo utilizan: user and admin routes.
-// Depende de: express-validator and backend/utils/passwordPolicy.js.

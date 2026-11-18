@@ -9,6 +9,11 @@ import { Navigate } from "react-router-dom";
 import { LoaderCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth.js";
 
+/**
+ * Espera a que AuthProvider termine de restaurar la sesión antes de mostrar children.
+ * Sin sesión redirige al login; si requireAdmin es true y falta ese rol, redirige al perfil. No
+ * reemplaza la autorización del backend.
+ */
 export function ProtectedRoute({ children, requireAdmin = false }) {
   const { isAuthenticated, isAdmin, isLoading } = useAuth();
 
@@ -32,6 +37,3 @@ export function ProtectedRoute({ children, requireAdmin = false }) {
   return children;
 }
 
-// Exporta: ProtectedRoute (auth/admin route guard).
-// Lo utilizan: src/App.jsx.
-// Depende de: react-router-dom, lucide-react, and src/hooks/useAuth.js.

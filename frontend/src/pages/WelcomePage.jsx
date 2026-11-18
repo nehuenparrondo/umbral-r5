@@ -3,6 +3,11 @@ import { Link } from "react-router-dom";
 import { ArrowRight, UserRound } from "lucide-react";
 import { useAuth } from "../hooks/useAuth.js";
 
+/**
+ * Lee el usuario público desde AuthContext y muestra nombre/email después del acceso.
+ * El enlace a /perfil permite abrir la configuración; esta pantalla está dentro de ProtectedRoute y
+ * no vuelve a pedir la contraseña.
+ */
 export function WelcomePage() {
   const { user } = useAuth();
   return (

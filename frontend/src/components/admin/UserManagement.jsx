@@ -1,9 +1,5 @@
 /**
  * Panel admin para listar usuarios y cambiar rol/estado sin exponer hashes.
- *
- * Lectura guiada. Componente reutilizable UserManagement. Sus props conectan contenido y
- * acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
- * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { RefreshCw, Save, Users } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -11,6 +7,11 @@ import { Alert } from "../Alert.jsx";
 import { Button } from "../Button.jsx";
 import { fetchUsers, updateUserAdmin } from "../../services/adminService.js";
 
+/**
+ * Carga usuarios paginados y mantiene un borrador independiente de rol/estado por fila.
+ * Los cambios se envían solo al guardar; el backend valida permisos y devuelve la fila confirmada.
+ * Los mensajes se muestran dentro del panel.
+ */
 export function UserManagement() {
   // users contiene usuarios publicos; la API no devuelve password_hash.
   const [users, setUsers] = useState([]);
@@ -24,6 +25,11 @@ export function UserManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [savingId, setSavingId] = useState("");
 
+  /**
+   * Solicita la página indicada, reemplaza el listado/total y prepara los borradores desde los
+   * valores guardados.
+   * Controla espera y errores; no modifica usuarios en la base al cargar la tabla.
+   */
   const loadUsers = useCallback(
     async (page = 1) => {
       // Carga usuarios paginados; el backend verifica rol admin en cada request.
@@ -60,6 +66,10 @@ export function UserManagement() {
     loadUsers(1);
   }, [loadUsers]);
 
+  /**
+   * Cambia un campo del borrador de la fila identificada por id. Actualiza solo estado React;
+   * todavía no envía una escritura.
+   */
   const updateDraft = (id, field, value) => {
     // Actualiza solo el borrador local de una fila.
     setDrafts((current) => ({
@@ -71,6 +81,12 @@ export function UserManagement() {
     }));
   };
 
+  /**
+   * Envía rol/estado del borrador, bloquea la fila mientras espera y sustituye el usuario por la
+   * respuesta confirmada.
+   * Si falla, conserva el listado confirmado y muestra el error; desactivar es una baja lógica
+   * aplicada por la API.
+   */
   const saveUser = async (userId) => {
     // Guarda cambio admin; backend impide que admin se quite su propio acceso.
     setSavingId(userId);

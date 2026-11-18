@@ -31,6 +31,8 @@ import {
 
 const router = Router();
 
+// Todas las rutas siguientes exigen sesión. Las escrituras agregan CSRF y validación
+// antes del controlador; este solo recibe una cuenta autorizada y campos comprobados.
 router.use(asyncHandler(requireAuth));
 
 router.get("/me", asyncHandler(getProfile));
@@ -66,6 +68,3 @@ router.post(
 
 export default router;
 
-// Exporta: userRoutes router.
-// Lo utilizan: backend/app.js under /api/users.
-// Depende de: user controllers, auth/validation middlewares, validators, and errors.

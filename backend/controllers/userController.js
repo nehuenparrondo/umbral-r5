@@ -22,15 +22,27 @@ import { cleanDisplayName, normalizeIdentifier } from "../utils/normalizers.js";
 import { withTransaction } from "../config/db.js";
 import { invalidateChallenges } from "../services/challengeService.js";
 
+/**
+ * Responde con el perfil público que requireAuth obtuvo desde SQL para la sesión actual.
+ */
 export const getProfile = async (req, res) => {
   res.json({ user: req.user });
 };
 
+/**
+ * Lista las redes vinculadas al usuario autenticado. Solo devuelve proveedor, email de la red y
+ * fecha, sin tokens de proveedores.
+ */
 export const getOAuthAccounts = async (req, res) => {
   const accounts = await listOAuthAccountsByUserId(req.user.id);
   res.json({ accounts });
 };
 
+/**
+ * Normaliza username/nombre visible y comprueba duplicados excluyendo a la propia cuenta.
+ * Actualiza perfil y auditoría en una transacción y devuelve {user}. Esta operación no cambia
+ * email, contraseña ni rol.
+ */
 export const updateProfile = async (req, res) => {
   // El email usa un flujo separado: solo cambia despues del codigo Mailtrap.
   const username = normalizeIdentifier(req.body.username);
@@ -79,6 +91,14 @@ export const updateProfile = async (req, res) => {
   res.json({ user: updatedUser });
 };
 
+/**
+ * Si ya hay contraseña local, compara la actual con bcrypt; una cuenta social sin hash puede crear
+ * la primera.
+ * Genera el hash de la nueva, lo guarda, revoca las otras sesiones, invalida desafíos y audita en
+ * una transacción.
+ * Conserva la sesión actual y devuelve el perfil con hasPassword; nunca devuelve la contraseña ni
+ * su hash.
+ */
 export const changePassword = async (req, res) => {
   const userForPassword = await findUserByIdForPassword(req.user.id);
   const passwordMatches = userForPassword.passwordHash
@@ -132,6 +152,3 @@ export const changePassword = async (req, res) => {
   });
 };
 
-// Exporta: profile controller handlers.
-// Lo utilizan: backend/routes/userRoutes.js.
-// Depende de: bcrypt, env, audit/session/user models, errors, and normalizers.

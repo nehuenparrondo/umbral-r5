@@ -49,6 +49,12 @@ const authUserSelect = `
   INNER JOIN roles ON roles.id = users.role_id
 `;
 
+/**
+ * Busca por email o username normalizado y devuelve datos internos de autenticación, incluido
+ * passwordHash, o null.
+ * Este resultado solo se usa en el backend; para responder al navegador se consulta el perfil
+ * público.
+ */
 export const findUserByIdentifierForAuth = async (
   identifier,
   client = { query },
@@ -65,6 +71,10 @@ export const findUserByIdentifierForAuth = async (
   return rows[0] || null;
 };
 
+/**
+ * Lee un usuario por UUID y devuelve el perfil público o null. Incluye hasPassword como booleano,
+ * nunca el hash de la contraseña.
+ */
 export const findPublicUserById = async (id, client = { query }) => {
   // Devuelve una vista segura del usuario para respuestas API.
   const { rows } = await client.query(
@@ -74,6 +84,10 @@ export const findPublicUserById = async (id, client = { query }) => {
   return rows[0] || null;
 };
 
+/**
+ * Busca por email normalizado y devuelve únicamente campos públicos o null. Se usa al resolver una
+ * identidad social.
+ */
 export const findPublicUserByEmail = async (email, client = { query }) => {
   const { rows } = await client.query(
     `${publicUserSelect} WHERE users.email_normalized = ? LIMIT 1`,
@@ -82,6 +96,12 @@ export const findPublicUserByEmail = async (email, client = { query }) => {
   return rows[0] || null;
 };
 
+/**
+ * Prueba una base de hasta 30 caracteres y sufijos numéricos hasta encontrar un username libre;
+ * falla si agota los intentos.
+ * Es una propuesta para altas sociales, no una reserva: el índice único decide finalmente al
+ * insertar.
+ */
 export const findUniqueUsername = async (base, client = { query }) => {
   // Genera una alternativa determinista y corta sin relajar el UNIQUE existente.
   const normalizedBase = normalizeUsername(base).slice(0, 30);
@@ -97,6 +117,11 @@ export const findUniqueUsername = async (base, client = { query }) => {
   throw new Error("No se pudo generar un username disponible.");
 };
 
+/**
+ * Devuelve la fila interna necesaria para comparar/cambiar contraseña. Si lock es true bloquea
+ * antes la fila con FOR UPDATE.
+ * Para que el bloqueo proteja varias operaciones, el llamador debe pasar un client transaccional.
+ */
 export const findUserByIdForPassword = async (
   id,
   client = { query },
@@ -112,6 +137,11 @@ export const findUserByIdForPassword = async (
   return rows[0] || null;
 };
 
+/**
+ * Compara email/username normalizados, con exclusión opcional de una cuenta durante edición.
+ * Devuelve {emailTaken, usernameTaken}; no modifica filas ni reemplaza las restricciones únicas de
+ * MySQL.
+ */
 export const findDuplicates = async (
   { email, username, excludeUserId = null },
   client = { query },
@@ -144,6 +174,13 @@ export const findDuplicates = async (
   };
 };
 
+/**
+ * Inserta un usuario con UUID, campos normalizados y rol resuelto desde roles; devuelve su perfil
+ * público.
+ * passwordHash debe llegar ya calculado con bcrypt, o null en un alta social. verified decide la
+ * fecha inicial de verificación.
+ * El client permite confirmar usuario, vinculación y auditoría como una sola operación.
+ */
 export const createUser = async (
   {
     email,
@@ -169,6 +206,12 @@ export const createUser = async (
   return findPublicUserById(id, client);
 };
 
+/**
+ * Actualiza username y nombre visible por id y devuelve el perfil público, o null si no se
+ * actualizó ninguna fila.
+ * La comprobación previa de disponibilidad pertenece al controlador; el índice único sigue
+ * protegiendo la escritura.
+ */
 export const updateUserProfile = async (
   { id, username, displayName },
   client = { query },
@@ -186,11 +229,16 @@ export const updateUserProfile = async (
   return findPublicUserById(id, client);
 };
 
+/**
+ * Guarda un hash ya calculado y reinicia contador de fallos/bloqueo.
+ * No calcula bcrypt ni revoca sesiones aquí: el controlador coordina esas operaciones con el mismo
+ * client.
+ */
 export const updatePasswordHash = async (
   { id, passwordHash },
   client = { query },
 ) => {
-  // El controlador ya genero el hash bcrypt; aqui solo se persiste.
+  // Recibe bcrypt ya calculado. El mismo método se usa para cambio desde perfil y recuperación.
   await client.query(
     `UPDATE users
      SET password_hash = ?, failed_login_attempts = 0, login_locked_at = NULL
@@ -199,6 +247,11 @@ export const updatePasswordHash = async (
   );
 };
 
+/**
+ * Consulta una página de perfiles públicos y su total y devuelve {users, total, page, pageSize}.
+ * El controlador valida/limita la paginación; esta consulta no entrega hashes ni comprueba el rol
+ * del solicitante.
+ */
 export const listUsers = async ({ page = 1, pageSize = 20 }) => {
   // Paginacion para que el panel admin no descargue toda la tabla sin limite.
   const offset = (page - 1) * pageSize;
@@ -222,6 +275,11 @@ export const listUsers = async ({ page = 1, pageSize = 20 }) => {
   };
 };
 
+/**
+ * Actualiza rol mediante la tabla roles y estado activo, y devuelve perfil público o null.
+ * La ruta exige administrador y el controlador impide quitarse el acceso; este modelo solo ejecuta
+ * la escritura.
+ */
 export const updateUserAdminFields = async (
   { id, role, isActive },
   client = { query },
@@ -239,6 +297,3 @@ export const updateUserAdminFields = async (
   return findPublicUserById(id, client);
 };
 
-// Exporta: user persistence functions.
-// Lo utilizan: auth, profile, admin controllers, and admin seed scripts.
-// Depende de: backend/config/db.js, backend/utils/normalizers.js, node:crypto.

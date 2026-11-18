@@ -1,9 +1,5 @@
 /**
  * Edita datos no sensibles; el email se verifica por un recorrido separado.
- *
- * Lectura guiada. Componente reutilizable ProfileDetailsForm. Sus props conectan contenido
- * y acciones con el componente que lo usa; para seguir el dato, buscar sus importaciones y
- * los callbacks recibidos en lugar de suponer que guarda directamente en una base.
  */
 import { Pencil, Save, UserRound } from "lucide-react";
 import { useState } from "react";
@@ -19,6 +15,13 @@ import { FormStatus } from "../FormStatus.jsx";
 import { TextField } from "../TextField.jsx";
 import { Alert } from "../Alert.jsx";
 
+/**
+ * Separa los datos confirmados de user y el borrador editable de username/nombre visible.
+ * Guardar valida y llama a la API; solo una respuesta exitosa actualiza AuthContext y cierra la
+ * edición.
+ * Cancelar descarta el borrador sin escribir en MySQL. El avatar de esta tarjeta es un icono, no
+ * una carga de archivos.
+ */
 export function ProfileDetailsForm() {
   const { user, updateAuthenticatedUser } = useAuth();
   const [editing, setEditing] = useState(false);
@@ -30,6 +33,7 @@ export function ProfileDetailsForm() {
       displayName: validateDisplayName(values.displayName),
     }),
     async (values) => {
+      // El contexto y la tarjeta cambian solo después de que la API confirmó la escritura.
       const result = await updateProfile(values);
       updateAuthenticatedUser(result.user);
       setEditing(false);
@@ -122,6 +126,3 @@ export function ProfileDetailsForm() {
   );
 }
 
-// Exporta: ProfileDetailsForm.
-// Lo utilizan: ProfilePage.
-// Depende de: session, useForm, validators and shared controls.

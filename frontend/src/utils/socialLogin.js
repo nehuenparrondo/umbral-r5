@@ -1,7 +1,5 @@
 /**
- * Guía de lectura. Ayudas compartidas para transformar o validar datos. Usarlas desde
- * varios puntos mantiene las mismas reglas; comprobar sus retornos antes de informar éxito
- * en la interfaz.
+ * Disponibilidad del acceso social. Solo habilita el proveedor si la respuesta terminó correctamente y confirmó configured con un booleano verdadero.
  */
 
 /**

@@ -8,6 +8,10 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../hooks/useTheme.js";
 
+/**
+ * Consume el tema actual y llama a toggleTheme al pulsar. La preferencia se aplica y conserva en
+ * ThemeProvider, no en cada pantalla.
+ */
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
@@ -26,6 +30,3 @@ export function ThemeToggle() {
   );
 }
 
-// Exporta: ThemeToggle (light/dark mode control).
-// Lo utilizan: AppShell.
-// Depende de: lucide-react and src/hooks/useTheme.js.

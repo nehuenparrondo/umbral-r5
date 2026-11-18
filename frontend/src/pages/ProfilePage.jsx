@@ -1,5 +1,5 @@
 /**
- * Reune el perfil completo de R3 y las identidades OAuth vinculadas.
+ * Configuración de R5: tarjeta editable y secciones desplegables de seguridad y conexiones.
  *
  * Lectura guiada. Pantalla ProfilePage. Coordina presentación y eventos; seguir los
  * servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los
@@ -14,6 +14,12 @@ import { PasswordChangeForm } from "../components/profile/PasswordChangeForm.jsx
 import { ProfileDetailsForm } from "../components/profile/ProfileDetailsForm.jsx";
 import { getOAuthAccounts } from "../services/userService.js";
 
+/**
+ * Compone tarjeta editable, email/contraseña y listado de redes vinculadas. Consulta las redes al
+ * montar.
+ * La marca active evita aplicar una respuesta después de abandonar la pantalla; cada formulario
+ * administra su guardado independiente.
+ */
 export function ProfilePage() {
   const [accounts, setAccounts] = useState([]);
   const [oauthStatus, setOAuthStatus] = useState({
@@ -94,6 +100,3 @@ export function ProfilePage() {
   );
 }
 
-// Exporta: ProfilePage.
-// Lo utilizan: App behind ProtectedRoute.
-// Depende de: R3 profile forms, OAuth account service and reusable alerts.

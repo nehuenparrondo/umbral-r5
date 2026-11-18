@@ -33,6 +33,13 @@ const titles = {
   reset_password: "Recuperá tu contraseña.",
 };
 
+/**
+ * Reutiliza una pantalla para verify_email, unlock y reset_password según purpose.
+ * Primero solicita desafío por identificador; con challengeId muestra código y, al recuperar,
+ * contraseña nueva.
+ * Verificar email vuelve al login; si desbloquear devuelve una sesión, la aplica y abre bienvenida.
+ * El servidor decide el resultado válido.
+ */
 export function CodePage({ purpose }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -91,6 +98,12 @@ export function CodePage({ purpose }) {
     },
   );
 
+  /**
+   * Solicita un desafío para el identificador/proósito, guarda su id, vacía el código anterior e
+   * inicia la espera visual.
+   * Devuelve la respuesta para mostrar el mensaje; el código secreto se consulta en el correo, no
+   * en este JSON.
+   */
   async function sendCode() {
     const result = await requestCode({
       identifier: form.values.identifier.trim().toLowerCase(),
@@ -200,6 +213,3 @@ export function CodePage({ purpose }) {
   );
 }
 
-// Exporta: CodePage.
-// Lo utilizan: App with a fixed purpose per route.
-// Depende de: code services, auth/form hooks and reusable UI components.

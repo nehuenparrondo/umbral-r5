@@ -1,7 +1,6 @@
 /**
- * Guía de lectura. Pantalla AdminPage. Coordina presentación y eventos; seguir los
- * servicios, hooks o contexto importados para encontrar dónde se comprueban y guardan los
- * datos.
+ * Página administrativa de R5. Alterna la gestión de usuarios y el listado de auditoría dentro de
+ * una ruta reservada a administradores.
  */
 
 // Requisito 4.4: separa gestion de usuarios e historial en componentes propios.
@@ -10,6 +9,11 @@ import { Users, History } from "lucide-react";
 import { UserManagement } from "../components/admin/UserManagement.jsx";
 import { AuditActivity } from "../components/admin/AuditActivity.jsx";
 
+/**
+ * Alterna las pestañas Usuarios y Actividad y monta su panel correspondiente.
+ * La ruta exige administrador; cada petición de esos paneles vuelve a comprobar el rol en el
+ * servidor.
+ */
 export function AdminPage() {
   const [view, setView] = useState("users");
   return (
